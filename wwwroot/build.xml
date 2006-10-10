@@ -1,10 +1,38 @@
 <project name="corfield.org CFMX" default="deploy">
 	<property name="target" value="/www/appserver/jboss/server/default/deploy/cfusion.ear/cfusion.war" />
 	<property name="source" value="." />
+	<property name="builds" value="../org-corfield-cfmx-builds" />
+	<property name="timestamp.path" value="${builds}/timestamp.txt" />
 	
 	<target name="deploy">
 		<copy todir="${target}">
 			<fileset dir="${source}" />
 		</copy>
 	</target>
+	
+	<target name="build" depends="build-concurrency,build-closure,build-ircbot">
+		<tstamp>
+			<format property="buildtime" pattern="yyyy-MM-dd'T'HH:mm:ss" />
+		</tstamp>
+		<echo file="${timestamp.path}" message="build.timestamp=${buildtime}" />
+	</target>
+		
+	<target name="build-concurrency">
+		<zip destfile="${builds}/concurrency.zip">
+			<fileset dir="${source}" includes="org/corfield/concurrency/**" />
+		</zip>
+	</target>
+	
+	<target name="build-closure">
+		<zip destfile="${builds}/closure.zip">
+			<fileset dir="${source}" includes="org/corfield/closure/**" />
+		</zip>
+	</target>
+	
+	<target name="build-ircbot">
+		<zip destfile="${builds}/ircbot.zip">
+			<fileset dir="${source}" includes="org/corfield/ircbot/**" />
+		</zip>
+	</target>
+	
 </project>
