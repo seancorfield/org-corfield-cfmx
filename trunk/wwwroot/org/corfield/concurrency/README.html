@@ -1,0 +1,536 @@
+<html>
+<head>
+<title>Concurrency library for ColdFusion MX 7</title>
+</head>
+<body>
+<h1>Concurrency library for ColdFusion MX 7</h1>
+<p>Copyright 2005 Sean A Corfield <a href="http://corfield.org/" target="_blank">http://corfield.org/</a></p>
+<p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at</p>
+<blockquote>
+  <p><a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+</blockquote>
+<p>Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+    limitations under the License.</p>
+<dl>
+  <dt><em> Release 1.3 2005-07-??  </em></dt>
+  <dd> Converted LICENSE / README files to HTML so Windows people don't
+        complain that Notepad does a lousy job of displaying the file
+        (Wordpad was fine); Eventually I'll make a really nice set of
+        HTML docs for this library; Added <code>TaskVector</code> to provide a simple
+    way to run a single task (method) in parallel on an array of data.</dd>
+  <dt><em> Release 1.2 2005-05-15  </em></dt>
+  <dd>Minor bug fixes &amp; code tidying (thanx to Roland Collins for the
+          feedback); Allowed <code>FutureTask.init()</code> to take a string or an
+          object; Changed <code>cancel()</code> so argument is optional (and defaults
+          to <code>false</code>); Added <code>TaskPool</code> - see documentation below; Allowed
+          arguments to be specified both via the <code>init()</code> method and via
+    the <code>run()</code> method on <code>FutureTask</code>.</dd>
+  <dt><em> Release 1.1 2005-05-04  </em></dt>
+  <dd>Departed from the exact Java 5 specifications; Deprecated
+          <code>Callable</code>; Allowed any method to be called on the task object;
+          Made result optional by allowing a fixed result to be specified;
+          You can now <code>cancel()</code> a running task if it has a <code>stop()</code> method -
+          and it subsequently calls <code>stopped()</code> on the <code>FutureTask</code> object;
+          Added documentation on the exception model; Added more vertical
+          whitespace in the code to appease Paul Kenney; Added Throws spec
+          to hints; Fixed a timing issue in <code>waitForResult()</code>; Allowed the
+          <code>get()</code> and <code>getWithTimeout()</code> methods to reset the task status so
+          that the task can be run over and over again; Allow arguments
+          to be passed into the <code>run()</code> method which get passed to the task
+    object's called method.</dd>
+  <dt><em>Release 1.0 2005-04-16 </em></dt>
+  <dd>Initial version.</dd>
+</dl>
+<h2>Introduction</h2>
+<p>This simple library is intended to provide Java 5 style 'futures' in
+      ColdFusion MX 7 using the CFML asynchronous event gateway. The intent
+      is to allow developers to very easily make asynchronous method calls
+      and retrieve the results (effectively joining the threads) without
+      needing to interact with the event gateway mechanism directly and
+      without needing to code any Java or joining code.
+      
+As of release 1.1 it departs from the Java 5 specification to provide
+      a more usable API for ColdFusion developers. </p>
+<h2>Installation</h2>
+<p>Put this directory (Concurrency) either in your webroot or on a custom
+    tag path so that the CFCs in this directory can be accessed using the
+    names <code>"Concurrency.FutureTask"</code>, <code>"Concurrency.Callable"</code>.</p>
+<p>Then, in your ColdFusion Administrator, create a new event gateway
+      instance called <code>CFML-Future</code>, of type CFML, and specify the CFC Path
+      to the <code>FutureEvent.cfc</code> file in the <code>Concurrency</code> directory (either under
+      your webroot or on a custom tag path, as indicated above). Select
+      <code>Automatic</code> for the <code>Startup Mode</code>. You do not need to specify a
+      <code>Configuration File</code>. Start the <code>CFML-Future</code> gateway instance.</p>
+<p>Now you're ready to test it! </p>
+<h2>Usage</h2>
+<p>Define a CFC that the <code>call()</code> method. This method will be executed asynchronously and should return a result: </p>
+<pre>
+    &lt;cfcomponent&gt;
+        &lt;cffunction name="call"&gt;
+            &lt;cfreturn 42&gt;
+        &lt;/cffunction&gt;
+    &lt;/cfcomponent&gt;
+
+Now create a test CFML page that does the following:
+1) creates an instance of your new CFC,
+2) creates an instance of Concurrency.FutureTask and initializes it
+   with your CFC instance,
+3) calls run() on the future,
+4) calls get() on the future to retrieve the result,
+5) displays the result.
+
+Assuming you created Test.cfc (as above) and test.cfm, here's what
+the simple test case would look like:
+
+&lt;cfset test = createObject("component","Test")&gt;
+&lt;cfset future = createObject("component","Concurrency.FutureTask").init(test)&gt;
+&lt;cfset future.run()&gt;
+&lt;cfset result = future.get()&gt;
+&lt;cfoutput&gt;The result was #result#.&lt;/cfoutput&gt;
+
+Additional usage notes
+----------------------
+
+FutureTask.run() can call any method on your task object and can pass
+arguments to the call. You specify the method name as an optional argument
+to FutureTask.init() or via a string (see below). Example:
+
+    future.init(task=myObj,method="execute");
+    ...
+    future.run(); // this calls myObj.execute()
+
+The default value for method= is "call" so this is backward compatible with
+release 1.0. This means you no longer need to extend Concurrency.Callable
+and, in fact, Concurrency.Callable is deprecated since it is no longer needed.
+
+The arguments for FutureTask.init() are:
+
+    task - any - required - your task object
+    result - any - optional - a fixed result (see below)
+    method - string - optional, default "call" - the method to call
+    
+Any additional arguments are stored and passed to the task when it is executed.
+If run() passes arguments as well, those overwrite the arguments passed via
+init(). Subsequent calls to run() continue to overwrite each previous collection
+of arguments.
+
+The task argument can be an instantiated object or it can be a string that
+specifies a component name or it can be a string that specifies a component
+name and method. Release 1.2 introduced the ability to specify a string. The
+string must be one of the following two forms:
+
+1. A component name, e.g., "org.corfield.SomeTask"
+2. A component name and a method call, e.g., "org.corfield.SomeTask.run()"
+
+The second form is ComponentName.methodName() - the () at the end is the flag
+that indicates the dot-separated string represents a method call. If a method
+is specified using this form, it overrides the method= argument, if present.
+
+If a component or component-and-method is specified as a string, the component
+is instantiated as part of FutureTask.init() but no further initialization is
+performed on the specified component. That means that if your task needs to
+have a method called to initialize it fully, e.g., init(), you cannot use this
+form of specification and must explicit instantiate and initialize your task
+before passing it to FutureTask.init().
+
+Note that the component name must be fully-qualified because the component is
+instantiated in the context of FutureTask, not in the context of the calling
+code.
+
+If you specify arguments when you call FutureTask.run(), they will be passed
+through to your task object's method. If you specify arguments by name in
+your task object's method, using &lt;cfargument&gt;, then you must use named
+arguments in the call to FutureTask.run(). Example:
+
+    future.run(arg1="1",arg2="two");
+
+Or use the argumentCollection= form:
+
+    args = structNew();
+    args.arg1 = "1";
+    args.arg2 = "two";
+    future.run(argumentCollection=args);
+
+In order to pass positional arguments, your task object's method must omit
+the &lt;cfargument&gt; tags and reference arguments as an array:
+
+    &lt;cfcomponent name="MyTask"&gt;
+        &lt;cffunction name="call"&gt;
+            &lt;cfreturn arguments[1] &amp; arguments[2]&gt;
+        &lt;/cffunction&gt;
+    &lt;/cfcomponent&gt;
+    ...
+    future = createObject("component","Concurrency.FutureTask");
+    future.init("MyTask");
+    future.run("1","two");
+
+Note that you cannot reliably use the argumentCollection= form with
+positional arguments (because structs do not keep their keys in any
+particular order). Using positional arguments is not recommended.
+
+You can also call methods that return no result. To do so, you must
+specify a return value in the constructor for the FutureTask object.
+For example, if your component has a call() method with returntype="void"
+you can initialize the FutureTask object with init(myObj,true) and then
+when you call get(), it will wait for run() to complete and then return
+the value you specified in the FutureTask constructor, i.e., true. This
+matches the Java 5 specification. Example:
+
+    &lt;cfcomponent name="Worker"&gt;
+        ... init method ...
+        &lt;cffunction name="call" returntype="void"&gt;
+            &lt;!--- do stuff ---&gt;
+        &lt;/cffunction&gt;
+    &lt;/cfcomponent&gt;
+    ...
+    task = createObject("component","Worker").init(42);
+    future = createObject("component","Concurrency.FutureTask");
+    future.init(task,"done"); // specify a fixed return value of "done"
+    future.run();
+    // the string "done" will be returned when
+    // Worker.call() completes
+    result = future.get();
+
+If you specify a result value in FutureTask.init() and your task object's
+method also returns a result, the value passed to FutureTask.init()
+always takes precedence. Example:
+
+    &lt;cfcomponent name="Answer"&gt;
+        &lt;cffunction name="call"&gt;
+            &lt;cfreturn 42&gt;
+        &lt;/cffunction&gt;
+    &lt;/cfcomponent&gt;
+    ...
+    future = createObject("component","Concurrency.FutureTask");
+    future.init("Answer","six times seven");
+    future.run();
+    // the string "six times seven" will be returned when
+    // Answer.call() completes, even though it returns
+    // the value 42 when called directly
+    result = future.get();
+
+If you want a task to be interruptible, i.e., that it can be cancelled
+once it is running, you should implement a method called stop() that
+takes a FutureTask object as an argument. This can either stop the task
+immediately (unlikely) or just set a flag so that the executing method
+on the task can periodically check and decide to abort execution. Either
+way, when execution is cancelled in this manner, the task must call the
+stopped() method on the FutureTask object passed to the stop() method.
+Yes, callbacks like this are a little complicated! Example:
+
+    &lt;cfcomponent name="Interruptible"&gt;
+
+        &lt;!--- need a flag to watch for cancel() requests: ---&gt;
+        &lt;cfset variables.stopRequested = false /&gt;
+        &lt;!--- need to remember the future that cancelled us: ---&gt;
+        &lt;cfset variables.future = 0 /&gt;
+        
+        &lt;cffunction name="stop" returntype="void" access="public"
+                    output="false" hint="I handle cancellation requests."&gt;
+            &lt;cfargument name="future"
+                        type="Concurrency.FutureTask" required="true"
+                        hint="I am the future that cancelled this task." /&gt;
+            &lt;cfset variables.future = arguments.future /&gt;
+            &lt;cfset variables.stopRequested = true /&gt;
+        &lt;/cffunction&gt;
+
+        &lt;cffunction name="call"&gt;
+            ...
+            &lt;!--- periodically check for cancellations: ---&gt;
+            &lt;cfif variables.stopRequested&gt;
+            	&lt;!---
+            	    tell the future that we stopped in response to the
+            	    cancellation request and then actually stop the
+            	    task - note that we do not need to return a sensible
+            	    result except to satisfy type-checking
+            	---&gt;
+                &lt;cfset variables.future.stopped() /&gt;
+                &lt;cfreturn /&gt;
+            &lt;/cfif&gt;
+            ...
+        &lt;/cffunction&gt;
+    &lt;/cfcomponent&gt;
+
+Then you can cancel a running task like this:
+
+&lt;cfset task = createObject("component","Interruptible") /&gt;
+&lt;cfset future = createObject("component","Concurrency.FutureTask").init(task) /&gt;
+&lt;cfset future.run() /&gt;
+&lt;!---
+    by default, cancel() will not try to interrupt a task that is already
+    running - passing true as an argument indicates that an attempt should be
+    made to cancel running task
+---&gt;
+&lt;cfset future.cancel(true) /&gt;
+
+&lt;cftry&gt;
+
+    &lt;!---
+        wait up to three seconds for the result - but the cancellation
+        should kick in before the timeout so you can catch the interruption
+        rather than the timeout
+    ---&gt;
+    &lt;cfset result = future.getWithTimeout(3000) /&gt;
+
+&lt;cfcatch type="CONCURRENCY.FUTURE.INTERRUPTEDEXCEPTION"&gt;
+
+    &lt;!--- task was interrupted - was it actually cancelled? ---&gt;
+    &lt;cfif future.isCancelled()&gt;
+        &lt;!--- the cancel request succeeded ---&gt;
+    &lt;/cfif&gt;
+
+&lt;/cfcatch&gt;
+
+&lt;/cftry&gt;
+
+Note that you only need to bother trying to get the result if you actually
+care about reporting whether the task really cancelled itself or not. The
+INTERRUPTEDEXCEPTION occurs on a get() / getWithTimeout() in three situations:
+1. Task was cancelled successfully
+2. Task was not initialized (status NULL)
+3. Task was not run (status READY)
+FutureTask.isCancelled() only returns true for the first case listed.
+
+You can call get() multiple times. By default, each call will return the
+same result. Only the first call to get() will wait for the task to finish -
+subsequent calls will return the result immediately.
+
+You can also call getWithTimeout() multiple times. Calls to getWithTimeout()
+will either return the result immediately if it is available or will wait up
+to the specified time for the result to become available. This means you can
+call getWithTimeout() repeatedly before a result actually becomes available.
+Once the result is available, subsequent calls will return that same value
+immediately.
+
+Both of these methods take an optional argument that specifies whether
+to reset the status of the task after returning the result. If you call
+get(true) or getWithTimeout(period,true) then the task will be reset
+to status READY and you can re-run the task. Note that if you use this
+to reset a task, subsequent calls to get() or getWithTimeout() will fail
+with CONCURRENCY.FUTURE.INTERRUPTEDEXCEPTION unless that task has actually
+been run again (you cannot call get() or getWithTimeout() on a task that has
+a status of READY!). Example:
+
+&lt;cfset test = createObject("component","Test")&gt;
+&lt;cfset future = createObject("component","Concurrency.FutureTask").init(test)&gt;
+&lt;cfset future.run()&gt;
+    &lt;!--- can call get() multiple times to retrieve the result: ---&gt;
+&lt;cfset result = future.get()&gt;
+&lt;cfset result = future.get()&gt;
+    &lt;!--- now get the result and reset the task status: ---&gt;
+&lt;cfset result = future.get(true)&gt;
+&lt;cfoutput&gt;The result of the first run was #result#.&lt;/cfoutput&gt;
+    &lt;!--- now we can just re-run the task without creating a new instance: ---&gt;
+&lt;cfset future.run()&gt;
+    &lt;!--- get result and reset task status again: ---&gt;
+&lt;cfset result = future.get(true)&gt;
+&lt;cfoutput&gt;The result of the second run was #result#.&lt;/cfoutput&gt;
+    &lt;!---
+        this call will fail because the task has not yet been (re-)run -
+        it will throw CONCURRENCY.FUTURE.INTERRUPTEDEXCEPTION:
+    ---&gt;
+&lt;cfset result = future.get()&gt;
+
+The TaskPool
+------------
+
+Requested and partially specified by Roland Collins, this allows you to
+easily run a group of tasks in parallel. You create a TaskPool object,
+add several tasks to it, then run them altogether. You can retrieve
+results individually as they become available or perform a 'join'
+operation to wait for all the tasks in the pool to finish before getting
+the results for each completed task.
+
+&lt;cfset pool = createObject("component","Concurrency.TaskPool").init() /&gt;
+&lt;cfset workA = pool.addTask(task="Worker.call()",value=1) /&gt;
+&lt;cfset workB = pool.addTask(task="Worker.call()",value=42) /&gt;
+&lt;cfset pool.run() /&gt;
+&lt;cfoutput&gt;
+&lt;p&gt;results: workA=#pool.get(workA)#, workB=#pool.get(workB)#&lt;/p&gt;
+&lt;/cfoutput&gt;
+
+In the above example, two tasks are added to the pool, both are the same
+CFC type, Worker, both to call the same method, call(). The first (task)
+will be called with the argument value set to 1 and the second (task)
+will be called with the argument value set to 42. The call to run()
+causes both tasks to start executing. Each call to get() blocks for the
+specified task and then returns the result (exactly like FutureTask.get()).
+
+If you don't need the results but want to wait until all tasks have
+completed, you can call TaskPool.join(). You can still call TaskPool.get()
+after that for any specific task.
+
+Most of the public methods found on FutureTask are also present on TaskPool.
+Many of them take a taskID as an argument that specifies which task to
+operate on (e.g., the get() methods shown above). For some of those methods,
+the taskID is optional and then the operation affects all of the tasks.
+
+Example:
+
+&lt;cfif pool.isDone()&gt;
+    &lt;!--- all of the tasks have finished executing ---&gt;
+&lt;cfelseif pool.isDone(taskA)&gt;
+    &lt;!--- taskA is completed, at least one other task is still running ---&gt;
+&lt;/cfif&gt;
+
+You can run() all tasks or just a specific task, you can cancel() all tasks
+or just a specific task. isCancelled() and isDone() can also operate on all
+tasks or just a specific task. get() and getWithTimeout() require a taskID
+and can only operate on a specific task.
+
+When you add a task, you can specify the following arguments:
+
+    task - any - required - your task object
+    result - any - optional - a fixed result
+    method - string - optional, default "call" - the method to call
+    autorun - boolean - optional, default false - whether the task should
+        automatically start to execute (instead of waiting for run()).
+
+The first three arguments are identical to those of FutureTask.init().
+
+Any additional arguments are stored and passed to the task when it is executed.
+If run() passes arguments as well, those overwrite the arguments passed via
+init(). Subsequent calls to run() continue to overwrite each previous collection
+of arguments.
+
+Lifecycle of a task
+-------------------
+
+A task, in the FutureTask object, can have the following states:
+NULL      - Initial state of the task (before construction).
+READY     - After constructor completes or future has been reset: task is
+            ready to run.
+RUNNING   - Once the run() method has been called.
+DONE      - After the task completes successfully.
+CANCELLED - After the task has been cancelled.
+FAILED    - After the task threw an exception.
+
+A task can only be run() if it is READY. A task is considered
+done (i.e., isDone() returns true) if it is DONE, CANCELLED or FAILED.
+
+If you try to get() the result of a task that has not yet run(),
+you will get CONCURRENCY.FUTURE.INTERRUPTEDEXCEPTION.
+
+If you try to run() a task that has already been run, nothing will
+happen, i.e., each task can only be run once - you must create a
+new FutureTask object for each execution or specify that the get()
+operation should reset the task after fetching the result.
+
+Exceptions that can be thrown
+-----------------------------
+
+The following exceptions can be thrown from the FutureTask object:
+
+CONCURRENCY.FUTURE.BADARGUMENT - thrown by init() if the first argument
+    does not specify a valid component (instance or name) or a valid
+    component/method name.
+CONCURRENCY.FUTURE.TIMEOUTEXCEPTION - thrown by getWithTimeout() if the
+    result does not become available in the specified timeout period.
+    (per Java 5 specification)
+CONCURRENCY.FUTURE.NOTSTARTED - thrown by run() if the task cannot
+    be added to the event gateway queue.
+CONCURRENCY.FUTURE.EXECUTIONEXCEPTION - thrown by get() / getWithTimeout()
+    if the task failed with an exception. The message, detail and errorcode
+    are the original exception's message, detail and _type_ respectively.
+    (per Java 5 specification)
+CONCURRENCY.FUTURE.INTERNALERROR - thrown by get() / getWithTimeout() if
+    the framework somehow manages to attempt to return the result of a
+    task that is still running.
+CONCURRENCY.FUTURE.INTERRUPTEDEXCEPTION - thrown by get() / getWithTimeout()
+    if the task was cancelled (or has not yet been run). (cancellation is
+    per Java 5 specification)
+
+Differences from Java 5 Future / Callable APIs
+----------------------------------------------
+
+The interface Callable exists as a component.
+    ColdFusion does not have interfaces but release 1.0 of this
+    library assumed you would extend Concurrency.Callable and
+    override the call() method to simulate Callable as an interface.
+    As of release 1.1, Callable is deprecated and no longer
+    needed. It is provided for backward compatibility only.
+    Release 1.1 works with any component. Either it should have a
+    call() method or you can specify a different method to be called.
+The interface Future does not exist.
+    ColdFusion does not have interfaces so there seemed little
+    point in creating an interface that would not be needed by
+    user code.
+FutureTask constructor.
+    Effectively supports both the (Callable) and (Runnable,T)
+    signatures although does not require that the CFC instance
+    passed as the first argument actually implements any
+    particular 'interface'. For those constructor forms, the
+    task object needs to implement call(). The constructor also
+    supports a third signature, (Component,T,string) to allow a
+    specific method to be called rather than just call(). The result
+    and the method name are both optional. The method name defaults
+    to "call". The arguments are task=, result= and method=. As of
+    release 1.2, the signatures (string), (string,T) and
+    (string,T,string) are supported where the first string can
+    specify a component name or a component name and a method name.
+FutureTask.cancel().
+    A running task can be cancelled if it implements a method
+    called stop() that takes a Concurrency.FutureTask as an
+    argument and then calls stopped() on that future when it
+    actually stops. This allows a long-running task to be
+    interrupted. For example, task.stop(future) can remember the
+    future and set a flag asking the task to stop. The long-
+    running process can occasionally check the flag and when
+    it sees the request to stop, it can clean up and then call
+    future.stopped() to notify the future that it has successfully
+    cancelled its execution. As of release 1.2, the argument is
+    optional and defaults to false.
+FutureTask.getWithTimeout().
+    Since ColdFusion does not have method overloading, I could
+    not define two variants of the get() method with different
+    arguments. I did not want to use a default argument since
+    get() and get(timeout) behave rather differently (in other
+    words I think the Java API is a little misleading!). Also
+    I did not implement the time units that are present in the
+    Java interface. You get milliseconds only. Get over it.
+FutureTask.get() and FutureTask.getWithTimeout().
+    Both of these have an additional optional argument that
+    specifies whether the status of the task should be reset after
+    returning the result. Java provides a protected runAndReset()
+    method instead but that did not seem as idiomatic to me.
+FutureTask.isDone() called before run().
+    It isn't entirely clear from the Java documentation what
+    should happen if you call isDone() before you call run().
+    Since I rely on isDone() inside get() and getWithTimeout()
+    having isDone() return false for a task that hasn't run()
+    means that if you accidentally call get() before run(),
+    you would wait 'forever'. I decided it was safer to have
+    isDone() return true for a task that has not yet run().
+FutureTask.runAndReset() is not implemented.
+    The Java version has it as protected but I don't expect you
+    extend FutureTask so for now I have not implemented it. I have
+    provided a reset argument for the get() methods which should
+    give you all the functionality you need.
+FutureTask.set() is package access.
+    Since I don't expect you to extend FutureTask, there seemed
+    no point in making this private (equivalent to Java's protected).
+    However, since I call it from FutureEvent behind the scenes,
+    package access seemed more appropriate.
+FutureTask.setException() is package access.
+    See the comment about FutureTask.set().
+
+Stylistic notes on the code
+---------------------------
+
+Use of &lt;cfswitch&gt; rather than &lt;cfif&gt; on variables.status in FutureTask.
+    Yes, I could have used &lt;cfif&gt; in some methods to check the value
+    of variables.status in FutureTask. However, it felt more consistent
+    from a stylistic point of view to use &lt;cfswitch&gt; everywhere since
+    it is needed in several methods.
+The private data is not encapsulated with get/set methods.
+    Since none of the private data is exposed to the API at all,
+    there would be no public get/set methods on this data. That
+    means the data is purely an implementation detail - it did
+    not seem worth the effort adding private get/set methods for
+    data that is already internal only.
+</pre>
+</body>
+</html>
