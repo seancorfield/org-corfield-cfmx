@@ -1,0 +1,10 @@
+<project name="corfield.org CFMX" default="deploy">
+	<property name="target" value="/www/appserver/jboss/server/default/deploy/cfusion.ear/cfusion.war" />
+	<property name="source" value="." />
+	
+	<target name="deploy">
+		<copy todir="${target}">
+			<fileset dir="${source}" />
+		</copy>
+	</target>
+</project>
