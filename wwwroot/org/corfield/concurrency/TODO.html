@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>Concurrency TODO</title>
+</head>
+<body>
+<pre>
+These are things I'm considering for future releases:
+
+TaskPool.getResults() / getResultsWithTimeout() - see below.
+TaskPool.kill(taskID) - cancel() task and remove it from the pool.
+
+An install CFM page that uses the CF Admin API to set up the gateway.
+Some sample applications (suggestions welcome).
+
+More pool stuff...
+
+struct TaskPool.getResults()
+struct TaskPool.getResultsWithTimeout(timeout)
+
+These would return a struct containing a key for each task. results[taskname] 
+would be a struct containing two flags: done, cancelled and if done is true a 
+third entry, result, containing the result.
+
+That would allow you to do this:
+
+&lt;cfset workerResults = pool.getResultsWithTimeout(2000) /&gt;
+
+And, in your scenario above you'd get:
+
+workerResults:
+    workerA:
+        done: true
+        cancelled: false
+        result: workerAResult
+    workerB:
+        done: false
+        cancelled: false
+    workerC:
+        done: true
+        cancelled: false
+        result: workerCResult
+</pre>
+</body>
+</html>
