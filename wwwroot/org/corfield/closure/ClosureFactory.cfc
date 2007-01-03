@@ -69,7 +69,7 @@
 		
 			<!--- synthesize a unique function name: --->
 			<cfset functionName = "_" & replace(createUUID(),"-","","all") />
-			<cfset filePath = expandPath(".") & "/" & functionName />
+			<cfset filePath = getDirectoryFromPath(getCurrentTemplatePath()) & functionName />
 	
 			<!--- if the code seems to be script code, wrap it in a cfscript tag: --->
 			<cfif left(code,1) is not '<'>
@@ -109,9 +109,9 @@
 				<cfset addToCache(key,closure) />
 				<!--- ...and finally remove the local private method --->
 				<cfset structDelete(variables,functionName) />
-		
-				<cffile action="delete" file="#filePath#" />
 	
+				<cffile action="delete" file="#filePath#" />
+
 			</cflock>
 
 		</cfif>		

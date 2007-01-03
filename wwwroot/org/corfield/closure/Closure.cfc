@@ -34,7 +34,6 @@
 				hint="I clone this closure and bind an arbitrary sequence of arguments into it">
 		<!--- takes any sequence of names arguments --->
 		
-		<cfset var key = "" />
 		<cfset var newClosure = createObject("component","Closure").init(variables._method) />
 		
 		<!--- add a public method from the private method so we can bind the arguments in: --->
@@ -53,6 +52,8 @@
 	<cffunction name="_bindVariables" returntype="void" access="private" output="false" 
 				hint="I bind an arbitrary sequence of arguments into this closure (but I do not overwrite variables)">
 		<!--- takes any sequence of names arguments --->
+
+		<cfset var key = "" />
 		
 		<cfloop collection="#arguments#" item="key">
 			<!--- we only bind in variables that don't clash! --->
