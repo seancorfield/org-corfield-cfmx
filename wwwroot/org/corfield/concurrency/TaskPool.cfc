@@ -156,7 +156,7 @@
 			</cfloop>
 		</cfif>
 		
-		<cfreturn cancelled />
+		<cfreturn completed />
 
 	</cffunction>
 	
