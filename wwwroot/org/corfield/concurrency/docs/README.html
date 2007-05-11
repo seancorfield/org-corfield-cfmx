@@ -509,12 +509,15 @@ FutureTask.runAndReset() is not implemented.
     extend FutureTask so for now I have not implemented it. I have
     provided a reset argument for the get() methods which should
     give you all the functionality you need.
-FutureTask.set() is package access.
+FutureTask.set() is public access but should be package access.
     Since I don't expect you to extend FutureTask, there seemed
     no point in making this private (equivalent to Java's protected).
     However, since I call it from FutureEvent behind the scenes,
-    package access seemed more appropriate.
-FutureTask.setException() is package access.
+    package access seemed more appropriate. Unfortunately, there is
+    a subtle bug in CFMX regarding case sensitivity in the Java file
+    file libraries that means package access is occasionally denied
+    when it should be permitted - so I made this public instead!
+FutureTask.setException() is public but should be package access.
     See the comment about FutureTask.set().
 
 Stylistic notes on the code
