@@ -250,10 +250,10 @@
 
 	</cffunction>
 	
-	<!--- PACKAGE METHODS --->
+	<!--- PACKAGE METHODS (or they would be if CF didn't have a subtle bug!) --->
 
 	<!--- getMethod() : string --->
-	<cffunction name="getMethod" returntype="string" access="package" output="false" 
+	<cffunction name="getMethod" returntype="string" access="public" output="false" 
 				hint="I return the name of the method to call on the task.">
 
 		<cfreturn variables.method />
@@ -261,7 +261,7 @@
 	</cffunction>
 	
 	<!--- hasResult() : boolean --->
-	<cffunction name="hasResult" returntype="boolean" access="package" output="false" 
+	<cffunction name="hasResult" returntype="boolean" access="public" output="false" 
 				hint="I indicate whether a result has already been recorded for a task.">
 
 		<cfreturn structKeyExists(variables,"result") />
@@ -269,7 +269,7 @@
 	</cffunction>
 	
 	<!--- set(v) : void --->
-	<cffunction name="set" returntype="void" access="package" output="false" 
+	<cffunction name="set" returntype="void" access="public" output="false" 
 				hint="I set the result of this future.">
 		<cfargument name="v" type="any" required="false" 
 					hint="I am the optional result value to set."/>
@@ -293,7 +293,7 @@
 	</cffunction>
 	
 	<!--- setException(e) : void --->
-	<cffunction name="setException" returntype="void" access="package" output="true" 
+	<cffunction name="setException" returntype="void" access="public" output="true" 
 				hint="I remember the exception thrown by the task.">
 		<cfargument name="e" type="any" required="true" 
 					hint="I am the exception the task threw."/>
