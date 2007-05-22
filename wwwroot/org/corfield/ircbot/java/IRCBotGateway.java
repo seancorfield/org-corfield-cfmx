@@ -76,6 +76,7 @@ public class IRCBotGateway extends GenericGateway {
 		CFEvent cfMsg = new CFEvent( getGatewayID() );
 		cfMsg.setCfcMethod(method);
 		data.put( "botName", botName );
+		data.put( "bot", this.bot );
         data.put( "channel", channel );
         data.put( "sender", sender );
         data.put( "otherUser", otherUser );
