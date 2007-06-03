@@ -30,5 +30,8 @@
 	languages to be hosted within a Java application. Naturally that allows
 	us to host these scripting languages within ColdFusion as well.</p>
 
-<p>Currently, only PHP has been implemented - run the <a href="cfphp/example.cfm">PHP
-		example</a>.</p>
+<p>Currently, the following languages have been implemented:</p>
+<ul>
+	<li>PHP - run the <a href="cfphp/example.cfm">PHP example</a>.</li>
+	<li>Ruby - run the <a href="cfruby/example.cfm">Ruby example</a>.</li>
+</ul>

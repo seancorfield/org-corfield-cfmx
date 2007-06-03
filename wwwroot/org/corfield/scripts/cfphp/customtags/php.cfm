@@ -29,7 +29,8 @@
 	<!--- create Quercus engine and setup output buffer: --->
 	<cfset factory = createObject("java","com.caucho.quercus.script.QuercusScriptEngineFactory").init() />
 	<cfset engine = factory.getScriptEngine() />
-	<cfset engine.getContext().setWriter( createObject("java","java.io.StringWriter").init() ) />
+	<cfset writer = createObject("java","java.io.StringWriter").init() />
+	<cfset engine.getContext().setWriter(writer) />
 
 	<!--- create coldfusion variable in PHP for calling page: --->
 	<cfset engine.put("_COLDFUSION",caller) />
@@ -53,6 +54,6 @@
 	<cfset engine.eval(thisTag.generatedContent) />
 	
 	<!--- extract the PHP output buffer: --->
-	<cfset thisTag.generatedContent = engine.getContext().getWriter().toString() />
+	<cfset thisTag.generatedContent = writer.toString() />
 	
 </cfif>
