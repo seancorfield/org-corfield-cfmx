@@ -50,8 +50,13 @@
 	<cfcatch />
 	</cftry>
 
+	<!--- wrap PHP code with <?php ... ?> if necessary: issue 4 --->
+	<cfset code = trim(thisTag.generatedContent) />
+	<cfif left(code,5) is not "<?php">
+		<cfset code = "<?php #code# ?>" />
+	</cfif>
 	<!--- execute the PHP code: --->	
-	<cfset engine.eval(thisTag.generatedContent) />
+	<cfset engine.eval(code) />
 	
 	<!--- extract the PHP output buffer: --->
 	<cfset thisTag.generatedContent = writer.toString() />

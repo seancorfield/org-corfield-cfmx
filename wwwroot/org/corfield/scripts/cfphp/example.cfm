@@ -54,29 +54,28 @@
 <cfset session.marker = "Hi, I'm a session variable!" />
 <cfset who = "Sean" />
 <cftimer label="Executing PHP" type="outline">
+	<!--- <?php ... ?> is optional --->
 	<script:php>
-		<?php
-			/* read a variable from ColdFusion: */
-			echo "Hello ".$_COLDFUSION["who"]."<br />";
-			
-			/* read a session variable from ColdFusion: */
-			echo $_SESSION["marker"]."<br />";
-			
-			/* read a URL variable from ColdFusion - should be: $_GET["test"] */
-			$test = $GET["test"];
-			echo $test."<br />";
-			
-			/* read a CGI variables from ColdFusion - should be: $_SERVER["SCRIPT_FILENAME"] */
-			echo $SERVER["SCRIPT_FILENAME"]."<br />";
-			
-			/* set a couple of ColdFusion variables: */
-			$_COLDFUSION["greeting"] = "wibble";
-			if ($test) {
-				$_SESSION["what"] = $test;
-			} else {
-				$_SESSION["what"] = "test was not passed as a URL variable";
-			}
-		?>
+		/* read a variable from ColdFusion: */
+		echo "Hello ".$_COLDFUSION["who"]."<br />";
+		
+		/* read a session variable from ColdFusion: */
+		echo $_SESSION["marker"]."<br />";
+
+		/* read a URL variable from ColdFusion - should be: $_GET["test"] */
+		$test = $GET["test"];
+		echo $test."<br />";
+		
+		/* read a CGI variables from ColdFusion - should be: $_SERVER["SCRIPT_FILENAME"] */
+		echo $SERVER["SCRIPT_FILENAME"]."<br />";
+		
+		/* set a couple of ColdFusion variables: */
+		$_COLDFUSION["greeting"] = "wibble";
+		if ($test) {
+			$_SESSION["what"] = $test;
+		} else {
+			$_SESSION["what"] = "test was not passed as a URL variable";
+		}
 	</script:php>
 </cftimer>
 <cfoutput>
