@@ -26,33 +26,68 @@
 
 <cfelse>
 
-	<!--- create Sun's JRuby engine: --->
-	<cfset factory = createObject("java","com.sun.script.jruby.JRubyScriptEngineFactory").init() />
-	<cfset engine = factory.getScriptEngine() />
-	<!--- we don't both with a writer because JRuby writes to System.out directly :( --->
+	<!--- create Sun's JRuby engine and script cache: --->
+	<cfif not structKeyExists(application,"__scripting") or 
+			not structKeyExists(application.__scripting,"ruby") or
+			not structKeyExists(application.__scripting.ruby,"cache") or
+			structKeyExists(URL,"refreshScriptCache")>
+		<cflock name="#application.applicationName#__scripting__ruby" timeout="300" type="exclusive">
+			<cfif not structKeyExists(application,"__scripting") or 
+					not structKeyExists(application.__scripting,"ruby") or
+					not structKeyExists(application.__scripting.ruby,"cache") or
+					structKeyExists(URL,"refreshScriptCache")>
 
-	<!--- create coldfusion variable in Ruby for calling page: --->
-	<cfset engine.put("coldfusion",caller) />
+				<cfset ruby = structNew() />
+				<cfset ruby.cache = structNew() />
+				<cfset ruby.factory = createObject("java","com.sun.script.jruby.JRubyScriptEngineFactory").init() />
+				<cfset application.__scripting.ruby = ruby />
 
-	<!--- wire in URL, form and CGI scopes: --->
-	<cfset engine.put("url",URL) />
-	<cfset engine.put("form",form) />
-	<cfset engine.put("cgi",CGI) />
-
-	<!--- connect session scope if available: --->
-	<cftry>
-		<cfset engine.put("session",session) />
-	<cfcatch />
-	</cftry>
-
-	<!--- execute the Ruby code and get the result: --->
-	<cfset result = engine.eval(thisTag.generatedContent) />
-	
-	<!--- Ruby returns the last expression which may be null: --->
-	<cfif isDefined("result")>
-		<cfset thisTag.generatedContent = result />
-	<cfelse>
-		<cfset thisTag.generatedContent = "" />
+			</cfif>
+		</cflock>
 	</cfif>
+	
+	<cfset script = thisTag.generatedContent />
+	<cfset scriptKey = script />
+	<cfset hashValue = hash(scriptKey) />
+	
+	<!--- because we cache the engine and script in application scope, we need to single thread execution per block: --->
+	<cflock name="#application.applicationName#__scripting__ruby__#hashValue#" timeout="300" type="exclusive">
+		<cfif not structKeyExists(application.__scripting.ruby.cache,scriptKey)>
+
+			<!--- compile the Ruby code: --->
+			<cfset engine = application.__scripting.ruby.factory.getScriptEngine() />			
+			<cfset code = engine.compile(thisTag.generatedContent) />
+			<cfset application.__scripting.ruby.cache[scriptKey] = code />
+
+		</cfif>
+	
+		<cfset code = application.__scripting.ruby.cache[scriptKey] />
+	
+		<cfset engine = code.getEngine() />
+		<!--- create coldfusion variable in Ruby for calling page: --->
+		<cfset engine.put("coldfusion",caller) />
+	
+		<!--- wire in URL, form and CGI scopes: --->
+		<cfset engine.put("url",URL) />
+		<cfset engine.put("form",form) />
+		<cfset engine.put("cgi",CGI) />
+	
+		<!--- connect session scope if available: --->
+		<cftry>
+			<cfset engine.put("session",session) />
+		<cfcatch />
+		</cftry>
+	
+		<!--- execute the Ruby code and get the result: --->
+		<cfset result = code.eval() />
+		
+		<!--- Ruby returns the last expression which may be null: --->
+		<cfif isDefined("result")>
+			<cfset thisTag.generatedContent = result />
+		<cfelse>
+			<cfset thisTag.generatedContent = "" />
+		</cfif>
+		
+	</cflock>
 	
 </cfif>

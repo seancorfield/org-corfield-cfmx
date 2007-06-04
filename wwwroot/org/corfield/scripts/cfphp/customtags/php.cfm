@@ -26,34 +26,71 @@
 
 <cfelse>
 
-	<!--- create Quercus engine and setup output buffer: --->
-	<cfset factory = createObject("java","com.caucho.quercus.script.QuercusScriptEngineFactory").init() />
-	<cfset engine = factory.getScriptEngine() />
-	<cfset writer = createObject("java","java.io.StringWriter").init() />
-	<cfset engine.getContext().setWriter(writer) />
+	<!--- create Quercus engine and script cache: --->
+	<cfif not structKeyExists(application,"__scripting") or 
+			not structKeyExists(application.__scripting,"php") or
+			not structKeyExists(application.__scripting.php,"cache") or
+			structKeyExists(URL,"refreshScriptCache")>
+		<cflock name="#application.applicationName#__scripting__php" timeout="300" type="exclusive">
+			<cfif not structKeyExists(application,"__scripting") or 
+					not structKeyExists(application.__scripting,"php") or
+					not structKeyExists(application.__scripting.php,"cache") or
+					structKeyExists(URL,"refreshScriptCache")>
 
-	<!--- create coldfusion variable in PHP for calling page: --->
-	<cfset engine.put("_COLDFUSION",caller) />
+				<cfset php = structNew() />
+				<cfset php.cache = structNew() />
+				<cfset php.factory = createObject("java","com.caucho.quercus.script.QuercusScriptEngineFactory").init() />
+				<cfset application.__scripting.php = php />
 
-	<!--- TODO: this is a hack right now - _GET, _POST and _SERVER do not work: --->
-	<cfset engine.put("GET",URL) />
-	<cfset engine.put("POST",form) />
-	<cfset engine.put("SERVER",CGI) />
+			</cfif>
+		</cflock>
+	</cfif>
+	
+	<cfset script = thisTag.generatedContent />
+	<cfset scriptKey = script />
+	<cfset hashValue = hash(scriptKey) />
+	
+	<!--- because we cache the engine and script in application scope, we need to single thread execution per block: --->
+	<cflock name="#application.applicationName#__scripting__php__#hashValue#" timeout="300" type="exclusive">
+		<cfif not structKeyExists(application.__scripting.php.cache,scriptKey)>
+
+			<!--- compile the PHP code: --->
+			<cfset engine = application.__scripting.php.factory.getScriptEngine() />			
+			<cfset code = engine.compile(thisTag.generatedContent) />
+			<cfset application.__scripting.php.cache[scriptKey] = code />
+
+		</cfif>
+	
+		<cfset code = application.__scripting.php.cache[scriptKey] />
+	
+		<cfset engine = code.getEngine() />
+		<!--- create coldfusion variable in PHP for calling page: --->
+		<cfset engine.put("_COLDFUSION",caller) />
+	
+		<!--- TODO: this is a hack right now - _GET, _POST and _SERVER do not work: --->
+		<cfset engine.put("GET",URL) />
+		<cfset engine.put("POST",form) />
+		<cfset engine.put("SERVER",CGI) />
 <!--- 
-	<cfset engine.put("_GET",URL) />
-	<cfset engine.put("_POST",form) />
-	<cfset engine.put("_SERVER",CGI) />
+		<cfset engine.put("_GET",URL) />
+		<cfset engine.put("_POST",form) />
+		<cfset engine.put("_SERVER",CGI) />
  --->
-	<!--- connect session scope if available: --->
-	<cftry>
-		<cfset engine.put("_SESSION",session) />
-	<cfcatch />
-	</cftry>
+		<!--- connect session scope if available: --->
+		<cftry>
+			<cfset engine.put("_SESSION",session) />
+		<cfcatch />
+		</cftry>
+	
+		<!--- need to create a unique writer for each code block: --->
+		<cfset writer = createObject("java","java.io.StringWriter").init() />
+		<cfset engine.getContext().setWriter(writer) />
+	
+		<cfset code.eval() />
+		
+		<!--- extract the PHP output buffer: --->
+		<cfset thisTag.generatedContent = writer.toString() />
+		
+	</cflock>
 
-	<!--- execute the PHP code: --->	
-	<cfset engine.eval(thisTag.generatedContent) />
-	
-	<!--- extract the PHP output buffer: --->
-	<cfset thisTag.generatedContent = writer.toString() />
-	
 </cfif>
