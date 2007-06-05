@@ -35,3 +35,6 @@
 	<li>PHP - run the <a href="cfphp/example.cfm">PHP example</a>.</li>
 	<li>Ruby - run the <a href="cfruby/example.cfm">Ruby example</a>.</li>
 </ul>
+
+<p>For more information, read the <a href="http://scripting.riaforge.org/wiki/"
+		target="_blank">documentation on the wiki</a>.</p>
