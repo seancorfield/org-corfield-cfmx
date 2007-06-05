@@ -23,6 +23,7 @@
 	Installation:
 	
 	1. Copy lib/*.jar to WEB-INF/cfusion/lib/
+	   (multiserver) or coldfusion8/lib (standalone)
 	2. Restart ColdFusion 8.
 	3. Optionally copy customtags/ruby.cfm into your custom tags path.
 	
@@ -46,6 +47,8 @@
 	
 	Assignments to variables in those Ruby 'scopes' will be reflected in the
 	ColdFusion page after the tag has executed.
+	
+	For more information, see http://scripting.riaforge.org/wiki/
 
 --->
 
