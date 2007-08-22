@@ -39,7 +39,7 @@
 			
 			<cfset testCase = createObject("component",testCaseName).init(testCaseName) />
 			
-		<cfcatch type="any">
+		<cfcatch type="NoSuchTemplateException">
 			<!---
 				retry with the prefix stripped if it fails - this allows for the funky
 				way the plugin locates files across Eclipse projects (it puts the project
