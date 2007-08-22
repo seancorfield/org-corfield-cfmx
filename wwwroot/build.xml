@@ -10,22 +10,28 @@
 		</copy>
 	</target>
 	
-	<target name="build" depends="build-concurrency,build-closure,build-ircbot,build-rest,build-scripts">
+	<target name="build" depends="build-cfeclipse,build-closure,build-concurrency,build-ircbot,build-rest,build-scripts">
 		<tstamp>
 			<format property="buildtime" pattern="yyyy-MM-dd'T'HH:mm:ss" />
 		</tstamp>
 		<echo file="${timestamp.path}" message="build.timestamp=${buildtime}" />
 	</target>
 		
-	<target name="build-concurrency">
-		<zip destfile="${builds}/concurrency.zip">
-			<fileset dir="${source}" includes="org/corfield/concurrency/**" />
+	<target name="build-cfeclipse">
+		<zip destfile="${builds}/cfeclipsefacade.zip">
+			<fileset dir="${source}" includes="org/corfield/cfeclipse/**" />
 		</zip>
 	</target>
 	
 	<target name="build-closure">
 		<zip destfile="${builds}/closure.zip">
 			<fileset dir="${source}" includes="org/corfield/closure/**" />
+		</zip>
+	</target>
+	
+	<target name="build-concurrency">
+		<zip destfile="${builds}/concurrency.zip">
+			<fileset dir="${source}" includes="org/corfield/concurrency/**" />
 		</zip>
 	</target>
 	
