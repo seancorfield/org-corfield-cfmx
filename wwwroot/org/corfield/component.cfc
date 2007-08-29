@@ -1,5 +1,36 @@
 <cfsilent>
-	
+<!---
+
+  component.cfc - Universal Base Class for ColdFusion
+ 
+  Copyright (c) 2006, Sean Corfield
+  
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+  dump() and throw() are just convenience methods
+
+  onMissingMethod() implements automatic get/set methods on all
+    components (with no security checking, just uses variables scope)
+
+  call() provides a way to call an arbitrary method by name on an object
+    passing arguments in a struct by name or positionally which makes it
+    it easier to use onMissingMethod() to create smart proxies
+
+  getFunctionMetadata() provides a high-performance way to get metadata
+    by name for a function in the *current* object, used by call()
+
+--->
+
 	<cffunction name="dump" magic="true">
 		<cfargument name="var" />
 		<cfargument name="label" default="" />
