@@ -95,7 +95,7 @@
 			</cfloop>
 			
 			<cfset code = cfArgs & code />
-			<cfset code = '<cffunction name="#functionName#"> #code# </cffunction>' />
+			<cfset code = '<' & 'cffunction name="#functionName#"> #code# </' & 'cffunction>' />
 			
 			<cflock name="#filePath#" type="exclusive" timeout="30">
 	
@@ -120,7 +120,7 @@
 
 	</cffunction>
 	
-	<cffunction name="isInCache" returntype="boolean" access="public" output="false" 
+	<cffunction name="isInCache" returntype="boolean" access="private" output="false" 
 				hint="I return true if the specified code block is already in the cache">
 		<cfargument name="key" type="string" required="true" hint="I am the text of a code block" />
 		
@@ -134,7 +134,7 @@
 		
 	</cffunction>
 	
-	<cffunction name="getFromCache" returntype="any" access="public" output="false" 
+	<cffunction name="getFromCache" returntype="any" access="private" output="false" 
 				hint="I return a closure from the cache">
 		<cfargument name="key" type="string" required="true" hint="I am the text of a code block" />
 		
@@ -148,7 +148,7 @@
 		
 	</cffunction>
 	
-	<cffunction name="addToCache" returntype="void" access="public" output="false" 
+	<cffunction name="addToCache" returntype="void" access="private" output="false" 
 				hint="I add a code block and its matching closure to the cache">
 		<cfargument name="key" type="string" required="true" hint="I am the text of a code block" />
 		<cfargument name="value" type="any" required="true" hint="I am a closure made from that code block" />
