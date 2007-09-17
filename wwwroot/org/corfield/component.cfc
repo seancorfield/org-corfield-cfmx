@@ -104,13 +104,7 @@
 		<cfif not structKeyExists(md.functionsbyname,arguments.method)>
 			<cflock name="md_#md.name#_fn_#arguments.method#" type="exclusive" timeout="10">
 				<cfif not structKeyExists(md.functionsbyname,arguments.method)>
-					<cfset n = arrayLen(md.functions) />
-					<cfloop index="i" from="1" to="#n#">
-						<cfif md.functions[i].name is arguments.method>
-							<cfset md.functionsbyname[arguments.method] = md.functions[i] />
-							<cfbreak />
-						</cfif>
-					</cfloop>
+					<cfset md.functionsbyname[arguments.method] = getMetadata(this[arguments.method]) />
 				</cfif>
 			</cflock>
 		</cfif>
