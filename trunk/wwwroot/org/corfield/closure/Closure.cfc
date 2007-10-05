@@ -74,5 +74,14 @@
 		<cfreturn this />
 		
 	</cffunction>
- 
+
+	<cffunction name="bound" returntype="any" access="public" output="false" 
+				hint="I return a specific bound variable.">
+		<cfargument name="name" type="string" required="true" 
+					hint="I am the name of the bound variable to return." />
+
+		<cfreturn variables[arguments.name] />
+
+	</cffunction>
+	
 </cfcomponent>
