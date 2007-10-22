@@ -49,7 +49,11 @@
 
 				<cfset testCaseName = right(testCaseName,len(testCaseName)-len(listFirst(testCaseName,"."))-1) />
 				<!--- if this fails we'll just let it throw an exception --->
-				<cfset testCase = createObject("component",testCaseName).init(testCaseName) />
+				<cfset testCase = createObject("component",testCaseName) />
+				<!--- Luis Majano pointed out there is actually no requirement to have an init() method on a test suite: --->
+				<cfif structKeyExists(testCase,"init") and isCustomFunction(testCase.init)>
+					<cfset testCase.init(testCaseName) />
+				</cfif>
 
 			<cfelse>
 				<!--- hmm, it's just a simple CFC name and we can't create it... --->
