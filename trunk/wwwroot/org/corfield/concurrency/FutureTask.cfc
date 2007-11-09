@@ -61,10 +61,14 @@
 		
 		<cfset variables.task = closure.object />
 		<cfset variables.method = closure.method />
-		<cfset structAppend(variables.taskArgs,arguments,true) />
 		<cfif structKeyExists(arguments,"result")>
 			<cfset variables.fixedResult = arguments.result />
 		</cfif>
+		<cfset structAppend(variables.taskArgs,arguments,true) />
+		<!--- task, result and method need to be removed from that list --->
+		<cfset structDelete(variables.taskArgs,"task") />
+		<cfset structDelete(variables.taskArgs,"result") />
+		<cfset structDelete(variables.taskArgs,"method") />
 		<cfset resetTask() />
 
 		<cfreturn this />
