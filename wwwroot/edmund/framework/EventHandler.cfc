@@ -6,7 +6,7 @@
 				hint="I am the event handler constructor.">
 		<cfargument name="maximumEventDepth" type="numeric" required="true"
 					hint="I am the new maximum event nesting depth." />
-		<cfargument name="ignoreAsync" type="numeric" required="true"
+		<cfargument name="ignoreAsync" type="boolean" required="true"
 					hint="I indicate whether async mode should fallback to sync mode on servers that do not support it." />
 
 		<cfset variables.maximumEventDepth = arguments.maximumEventDepth />
