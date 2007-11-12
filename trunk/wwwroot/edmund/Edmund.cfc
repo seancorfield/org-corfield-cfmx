@@ -3,7 +3,7 @@
 	<cffunction name="init" returntype="any" access="public" output="false" hint="I am the framework constructor.">
 		<cfargument name="maximumEventDepth" type="numeric" default="10"
 					hint="I am the maximum event nesting depth." />
-		<cfargument name="ignoreAsync" type="numeric" default="false"
+		<cfargument name="ignoreAsync" type="boolean" default="false"
 					hint="I indicate whether async mode should fallback to sync mode on servers that do not support it." />
 		
 		<cfset variables.handler = createObject("component","edmund.framework.EventHandler").init(arguments.maximumEventDepth,arguments.ignoreAsync) />
@@ -38,7 +38,7 @@
 		
 	</cffunction>
 	
-	<cffunction name="dispatchEvent" returntype="any" access="public" output="false" 
+	<cffunction name="dispatchEvent" returntype="void" access="public" output="false" 
 				hint="I dispatch an event.">
 		<cfargument name="event" type="edmund.framework.Event" required="true" 
 					hint="I am the event to be handled." />
