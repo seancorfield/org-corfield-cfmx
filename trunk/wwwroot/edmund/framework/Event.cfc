@@ -33,6 +33,13 @@
 	
 	</cffunction>
 	
+	<cffunction name="getAllValues" returntype="struct" access="public" output="false" 
+				hint="I return a shallow copy of all the event values.">
+	
+		<cfreturn structCopy(variables.values) />
+	
+	</cffunction>
+	
 	<cffunction name="setValue" returntype="void" access="public" output="false" 
 				hint="I store a value in the event.">
 		<cfargument name="name" type="string" required="true" 
