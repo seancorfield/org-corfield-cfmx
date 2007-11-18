@@ -57,10 +57,12 @@
 							message="'listener' declaration cannot have both 'type' and 'bean'" 
 							detail="#parsedXML.xmlRoot.xmlName#>listeners>listener '#item.xmlAttributes.name#' has both 'type' and 'bean' attributes in '#variables.file#'" />
 				<cfelse>
+					<!--- instantiate the listener --->
 					<cfset obj = createObject("component",item.xmlAttributes.type) />
 					<cfif structKeyExists(obj,"init") and isCustomFunction(obj.init)>
 						<cfset obj.init() />
 					</cfif>
+					<!--- remember the listener --->
 					<cfset variables.listeners[item.xmlAttributes.name] = obj />
 				</cfif>
 			<cfelseif structKeyExists(item.xmlAttributes,"bean")>
@@ -69,6 +71,7 @@
 							message="'bean' attribute requires bean factory support" 
 							detail="#parsedXML.xmlRoot.xmlName#>listeners>listener '#item.xmlAttributes.name#' has 'bean' attribute but Edmund has no bean factory in '#variables.file#'" />
 				<cfelse>
+					<!--- get the listener object from the factory --->
 					<cfset variables.listeners[item.xmlAttributes.name] = variables.edmund.getBeanFactory().getBean(item.xmlAttributes.bean) />
 				</cfif>
 			<cfelse>
@@ -87,9 +90,14 @@
 
 		<cfset var items = xmlSearch(arguments.parsedXML,"//message-subscribers/message") />
 		<cfset var item = 0 />
+		<cfset var async = false />
 		<cfset var obj = 0 />
 		<cfset var n = arrayLen(items) />
 		<cfset var i = 0 />
+		<cfset var children = 0 />
+		<cfset var nc = 0 />
+		<cfset var ic = 0 />
+		<cfset var child = 0 />
 		
 		<cfloop index="i" from="1" to="#n#">
 			<cfset item = items[i] />
@@ -99,7 +107,45 @@
 						message="'name' is required on 'message' declaration" 
 						detail="#parsedXML.xmlRoot.xmlName#>message-subscribers>message missing 'name' attribute in '#variables.file#'" />
 			</cfif>
+			<!--- multithreaded is optional and defaults to false --->
+			<cfset async = false />
+			<cfif structKeyExists(item.xmlAttributes,"multithreaded")>
+				<cfif listFind("false,true",item.xmlAttributes.multithreaded) gt 0>
+					<cfset async = item.xmlAttributes.multithreaded is "true" />
+				<cfelse>
+					<cfthrow type="edmund.illegalAttribute" 
+							message="'multithreaded' must be 'true' or 'false'" 
+							detail="#parsedXML.xmlRoot.xmlName#>message-subscribers>message '#item.xmlAttributes.name#' has a multithreaded attribute of '#item.xmlAttributes.multithreaded#' which should be 'true' or 'false' in '#variables.file#'" />
+				</cfif>
+			</cfif>
 			<!--- children(subscribe): listener, method --->
+			<cfset nc = arrayLen(item.xmlChildren) />
+			<cfloop index="ic" from="1" to="#nc#">
+				<cfset child = item.xmlChildren[ic] />
+				<cfif child.xmlName is "subscribe">
+					<cfif not structKeyExists(child.xmlAttributes,"listener")>
+						<cfthrow type="edmund.missingAttribute" 
+								message="'listener' is required on 'subscribe' declaration" 
+								detail="#parsedXML.xmlRoot.xmlName#>message-subscribers>message '#item.xmlAttributes.name#'>subscribe missing 'listener' attribute in '#variables.file#'" />
+					</cfif>
+					<cfif not structKeyExists(variables.listeners,child.xmlAttributes.listener)>
+						<cfthrow type="edmund.illegalAttribute" 
+								message="'#child.xmlAttributes.listener#' is an unknown listener" 
+								detail="#parsedXML.xmlRoot.xmlName#>message-subscribers>message '#item.xmlAttributes.name#'>subscribe '#child.xmlAttributes.listener#' was not declared as a listener in '#variables.file#'" />
+					</cfif>
+					<cfif not structKeyExists(child.xmlAttributes,"method")>
+						<cfthrow type="edmund.missingAttribute" 
+								message="'method' is required on 'subscribe' declaration" 
+								detail="#parsedXML.xmlRoot.xmlName#>message-subscribers>message '#item.xmlAttributes.name#'>subscribe missing 'method' attribute in '#variables.file#'" />
+					</cfif>
+					<!--- register the subscriber --->
+					<cfset variables.edmund.register(item.xmlAttributes.name,variables.listeners[child.xmlAttributes.listener],child.xmlAttributes.method,async) />
+				<cfelse>
+					<cfthrow type="edmund.unexpectedDeclaration" 
+							message="Unexpected '#child.xmlName#' declaration found in 'message' declaration" 
+							detail="#parsedXML.xmlRoot.xmlName#>message-subscribers>message '#item.xmlAttributes.name#'>#child.xmlName# is illegal inside a 'message' declaration in '#variables.file#'" />
+				</cfif>
+			</cfloop>
 		</cfloop>
 
 	</cffunction>
@@ -112,8 +158,13 @@
 		<cfset var items = xmlSearch(arguments.parsedXML,"//controllers/controller") />
 		<cfset var item = 0 />
 		<cfset var obj = 0 />
+		<cfset var async = false />
 		<cfset var n = arrayLen(items) />
 		<cfset var i = 0 />
+		<cfset var children = 0 />
+		<cfset var nc = 0 />
+		<cfset var ic = 0 />
+		<cfset var child = 0 />
 		
 		<cfloop index="i" from="1" to="#n#">
 			<cfset item = items[i] />
@@ -129,10 +180,12 @@
 							message="'controller' declaration cannot have both 'type' and 'bean'" 
 							detail="#parsedXML.xmlRoot.xmlName#>controllers>controller '#item.xmlAttributes.name#' has both 'type' and 'bean' attributes in '#variables.file#'" />
 				<cfelse>
+					<!--- instantiate the listener --->
 					<cfset obj = createObject("component",item.xmlAttributes.type) />
 					<cfif structKeyExists(obj,"init") and isCustomFunction(obj.init)>
 						<cfset obj.init() />
 					</cfif>
+					<!--- remember the listener --->
 					<cfset variables.listeners[item.xmlAttributes.name] = obj />
 				</cfif>
 			<cfelseif structKeyExists(item.xmlAttributes,"bean")>
@@ -141,6 +194,7 @@
 							message="'bean' attribute requires bean factory support" 
 							detail="#parsedXML.xmlRoot.xmlName#>controllers>controllers '#item.xmlAttributes.name#' has 'bean' attribute but Edmund has no bean factory in '#variables.file#'" />
 				<cfelse>
+					<!--- get the listener object from the factory --->
 					<cfset variables.listeners[item.xmlAttributes.name] = variables.edmund.getBeanFactory().getBean(item.xmlAttributes.bean) />
 				</cfif>
 			<cfelse>
@@ -149,6 +203,39 @@
 						detail="#parsedXML.xmlRoot.xmlName#>controllers>controller '#item.xmlAttributes.name#' missing 'type' or 'bean' attribute in '#variables.file#'" />
 			</cfif>
 			<!--- children(message-listener): message, function --->
+			<cfset nc = arrayLen(item.xmlChildren) />
+			<cfloop index="ic" from="1" to="#nc#">
+				<cfset child = item.xmlChildren[ic] />
+				<cfif child.xmlName is "message-listener">
+					<cfif not structKeyExists(child.xmlAttributes,"message")>
+						<cfthrow type="edmund.missingAttribute" 
+								message="'message' is required on 'message-listener' declaration" 
+								detail="#parsedXML.xmlRoot.xmlName#>controllers>controller '#item.xmlAttributes.name#'>message-listener missing 'message' attribute in '#variables.file#'" />
+					</cfif>
+					<cfif not structKeyExists(child.xmlAttributes,"function")>
+						<cfthrow type="edmund.missingAttribute" 
+								message="'function' is required on 'message-listener' declaration" 
+								detail="#parsedXML.xmlRoot.xmlName#>controllers>controller '#item.xmlAttributes.name#'>message-listener missing 'function' attribute in '#variables.file#'" />
+					</cfif>
+					<!--- multithreaded is optional and defaults to false --->
+					<cfset async = false />
+					<cfif structKeyExists(child.xmlAttributes,"async")>
+						<cfif listFind("false,true",child.xmlAttributes.async) gt 0>
+							<cfset async = child.xmlAttributes.async is "true" />
+						<cfelse>
+							<cfthrow type="edmund.illegalAttribute" 
+									message="'multithreaded' must be 'true' or 'false'" 
+									detail="#parsedXML.xmlRoot.xmlName#>controllers>controller '#item.xmlAttributes.name#'>message-listener has an async attribute of '#child.xmlAttributes.async#' which should be 'true' or 'false' in '#variables.file#'" />
+						</cfif>
+					</cfif>
+					<!--- register the subscriber --->
+					<cfset variables.edmund.register(child.xmlAttributes.message,variables.listeners[item.xmlAttributes.name],child.xmlAttributes.function,async) />
+				<cfelse>
+					<cfthrow type="edmund.unexpectedDeclaration" 
+							message="Unexpected '#child.xmlName#' declaration found in 'message' declaration" 
+							detail="#parsedXML.xmlRoot.xmlName#>controllers>controller '#item.xmlAttributes.name#'>#child.xmlName# is illegal inside a 'message' declaration in '#variables.file#'" />
+				</cfif>
+			</cfloop>
 		</cfloop>
 
 	</cffunction>
@@ -163,6 +250,10 @@
 		<cfset var obj = 0 />
 		<cfset var n = arrayLen(items) />
 		<cfset var i = 0 />
+		<cfset var children = 0 />
+		<cfset var nc = 0 />
+		<cfset var ic = 0 />
+		<cfset var child = 0 />
 		
 		<cfloop index="i" from="1" to="#n#">
 			<cfset item = items[i] />
@@ -181,6 +272,10 @@
 					broadcasts:
 						children(message): name
 			--->
+			<cfset nc = arrayLen(item.xmlChildren) />
+			<cfloop index="ic" from="1" to="#nc#">
+				<cfset child = item.xmlChildren[ic] />
+			</cfloop>
 		</cfloop>
 
 	</cffunction>

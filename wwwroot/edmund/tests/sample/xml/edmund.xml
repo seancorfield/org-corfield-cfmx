@@ -5,14 +5,18 @@
 	</listeners>
 	
 	<message-subscribers>
-		<message name="msg1" multithreaded="true|false" waitForThreads="true|false" timeout="60">
-			<subscribe listener="m2" method="msgSubscriber" resultArg="arg"/>
+		<message name="msg1" multithreaded="true" waitForThreads="ignored" timeout="ignored">
+			<subscribe listener="m2" method="msgSubscriber" resultArg="ignored"/>
+		</message>
+		<message name="msg2">
+			<subscribe listener="m2" method="msgSubscriber" resultArg="ignored"/>
 		</message>
 	</message-subscribers>
 	
 	<controllers>
 		<controller name="mg" type="edmund.tests.sample.xml.listener">
-			<message-listener message="msg2" function="msgListener" />
+			<message-listener message="msg3" function="msgListener" async="true" />
+			<message-listener message="msg4" function="msgListener" />
 		</controller>
 	</controllers>
 
@@ -21,11 +25,13 @@
 		<event-handler event="mach">
 			<notify listener="m2" method="directCall" />
 			<publish message="msg1"/>
+			<publish message="msg2"/>
 		</event-handler>
 		
 		<event-handler name="model">
 			<broadcasts>
-				<message name="msg2" />
+				<message name="msg3" />
+				<message name="msg4" />
 			</broadcasts>
 		</event-handler>
 	
