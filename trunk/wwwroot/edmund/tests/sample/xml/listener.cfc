@@ -6,15 +6,18 @@
 	</cffunction>
 	
 	<cffunction name="msgSubscriber">
-		<cflog application="true" log="Application" text="msgSubscriber() called" type="information" />
+		<cfargument name="event" />
+		<cflog application="true" log="Application" text="msgSubscriber(#arguments.event.getName()#) called" type="information" />
 	</cffunction>
 	
 	<cffunction name="msgListener">
-		<cflog application="true" log="Application" text="msgListener() called" type="information" />
+		<cfargument name="event" />
+		<cflog application="true" log="Application" text="msgListener(#arguments.event.getName()#) called" type="information" />
 	</cffunction>
 	
 	<cffunction name="directCall">
-		<cflog application="true" log="Application" text="directCall() called" type="information" />
+		<cfargument name="event" />
+		<cflog application="true" log="Application" text="directCall(#arguments.event.getName()#) called" type="information" />
 	</cffunction>
 
 </cfcomponent>
