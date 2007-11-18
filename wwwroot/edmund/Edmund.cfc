@@ -1,5 +1,6 @@
 <cfcomponent hint="I am the main entry point for the framework." output="false">
 
+	<!--- constructor --->
 	<cffunction name="init" returntype="any" access="public" output="false" hint="I am the framework constructor.">
 		<cfargument name="maximumEventDepth" type="numeric" default="10"
 					hint="I am the maximum event nesting depth." />
@@ -7,22 +8,35 @@
 					hint="I indicate whether async mode should fallback to sync mode on servers that do not support it." />
 		
 		<cfset variables.handler = createObject("component","edmund.framework.EventHandler").init(arguments.maximumEventDepth,arguments.ignoreAsync) />
+		<cfset variables.loader = createObject("component","edmund.framework.Loader").init(this) />
 		
 		<cfreturn this />
 			
 	</cffunction>
 	
+	<!--- XML file loader --->
+	<cffunction name="load" returntype="any" access="public" output="false" 
+				hint="I load event / listener definitions from an XML file.">
+		<cfargument name="file" type="string" required="true" 
+					hint="I am the full filesystem path of the XML file to load.">
+	
+		<cfset variables.loader.load(arguments.file) />
+		
+		<cfreturn this />
+	
+	</cffunction>
+	
+	<!--- convenience method to create new events by name --->
 	<cffunction name="new" returntype="any" access="public" output="false" 
 				hint="I return a new event.">
 		<cfargument name="name" type="string" required="true" 
 					hint="I am the name of the new event." />
 					
-		<cfset var eventName = arguments.name />
-
-		<cfreturn createObject("component","edmund.framework.Event").init(eventName) />
+		<cfreturn createObject("component","edmund.framework.Event").init(arguments.name) />
 
 	</cffunction>
 	
+	<!--- registration point for listeners --->
 	<cffunction name="register" returntype="void" access="public" output="false" 
 				hint="I register a new event handler.">
 		<cfargument name="eventName" type="string" required="true" 
@@ -38,6 +52,17 @@
 		
 	</cffunction>
 	
+	<!--- dispatch event by name --->
+	<cffunction name="dispatch" returntype="void" access="public" output="false" 
+				hint="I dispatch an event by name, with no values.">
+		<cfargument name="eventName" type="string" required="true" 
+					hint="I am the name of the event to be handled." />
+
+		<cfset dispatchEvent( new(arguments.eventName) ) />
+
+	</cffunction>
+	
+	<!--- dispatch event by object --->
 	<cffunction name="dispatchEvent" returntype="void" access="public" output="false" 
 				hint="I dispatch an event.">
 		<cfargument name="event" type="edmund.framework.Event" required="true" 
@@ -111,4 +136,28 @@
 		
 	</cffunction>
 
+	<!--- hooks for bean factory usage --->
+	<cffunction name="setBeanFactory" returntype="void" access="public" output="false" 
+				hint="I allow a bean factory to be injected.">
+		<cfargument name="beanFactory" type="any" required="true" 
+					hint="I am a bean factory.">
+		
+		<cfset variables.beanFactory = arguments.beanFactory />
+		
+	</cffunction>
+	
+	<cffunction name="hasBeanFactory" returntype="boolean" access="public" output="false" 
+				hint="I return true if a bean factory was injected.">
+		
+		<cfreturn structKeyExists(variables,"beanFactory") />
+		
+	</cffunction>
+	
+	<cffunction name="getBeanFactory" returntype="any" access="public" output="false" 
+				hint="I return the bean factory.">
+		
+		<cfreturn variables.beanFactory />
+		
+	</cffunction>
+	
 </cfcomponent>

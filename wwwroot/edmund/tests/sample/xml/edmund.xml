@@ -1,0 +1,34 @@
+<edmund>
+	
+	<listeners>
+		<listener name="m2" type="edmund.tests.sample.xml.listener"/>
+	</listeners>
+	
+	<message-subscribers>
+		<message name="msg1" multithreaded="true|false" waitForThreads="true|false" timeout="60">
+			<subscribe listener="m2" method="msgSubscriber" resultArg="arg"/>
+		</message>
+	</message-subscribers>
+	
+	<controllers>
+		<controller name="mg" type="edmund.tests.sample.xml.listener">
+			<message-listener message="msg2" function="msgListener" />
+		</controller>
+	</controllers>
+
+	<event-handlers>
+			
+		<event-handler event="mach">
+			<notify listener="m2" method="directCall" />
+			<publish message="msg1"/>
+		</event-handler>
+		
+		<event-handler name="model">
+			<broadcasts>
+				<message name="msg2" />
+			</broadcasts>
+		</event-handler>
+	
+	</event-handlers>
+
+</edmund>
