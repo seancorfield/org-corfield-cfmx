@@ -94,6 +94,11 @@
 		<cfloop index="i" from="1" to="#n#">
 			<cfset item = items[i] />
 			<!--- name, multithreaded (optional: false) --->
+			<cfif not structKeyExists(item.xmlAttributes,"name")>
+				<cfthrow type="edmund.missingAttribute" 
+						message="'name' is required on 'message' declaration" 
+						detail="#parsedXML.xmlRoot.xmlName#>message-subscribers>message missing 'name' attribute in '#variables.file#'" />
+			</cfif>
 			<!--- children(subscribe): listener, method --->
 		</cfloop>
 
@@ -131,12 +136,12 @@
 					<cfset variables.listeners[item.xmlAttributes.name] = obj />
 				</cfif>
 			<cfelseif structKeyExists(item.xmlAttributes,"bean")>
-				<cfif variables.edmund.hasBeanFactory()>
+				<cfif not variables.edmund.hasBeanFactory()>
 					<cfthrow type="edmund.badAttribute" 
 							message="'bean' attribute requires bean factory support" 
 							detail="#parsedXML.xmlRoot.xmlName#>controllers>controllers '#item.xmlAttributes.name#' has 'bean' attribute but Edmund has no bean factory in '#variables.file#'" />
 				<cfelse>
-					<cfset variables.listeners[item.xmlAttributes.name] = item.xmlAttributes.bean />
+					<cfset variables.listeners[item.xmlAttributes.name] = variables.edmund.getBeanFactory().getBean(item.xmlAttributes.bean) />
 				</cfif>
 			<cfelse>
 				<cfthrow type="edmund.missingAttribute" 
@@ -162,6 +167,13 @@
 		<cfloop index="i" from="1" to="#n#">
 			<cfset item = items[i] />
 			<!--- name|event --->
+			<cfif structKeyExists(item.xmlAttributes,"name")>
+			<cfelseif structKeyExists(item.xmlAttributes,"event")>
+			<cfelse>
+				<cfthrow type="edmund.missingAttribute" 
+						message="'name' or 'event is required on 'event-handler' declaration" 
+						detail="#parsedXML.xmlRoot.xmlName#>event-handlers>event-handler missing 'name' or 'event' attribute in '#variables.file#'" />
+			</cfif>
 			<!---
 				children:
 					notify: listener, method
