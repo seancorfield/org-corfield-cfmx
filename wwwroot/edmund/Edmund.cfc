@@ -86,7 +86,19 @@
 		<cfargument name="event" type="edmund.framework.Event" required="true" 
 					hint="I am the event to be handled." />
 
-		<cfset variables.handler.handleEvent(arguments.event) />
+		<cfset variables.handler.handleEvent(arguments.event.getName(),arguments.event) />
+
+	</cffunction>
+	
+	<!--- dispatch event by name and object --->
+	<cffunction name="dispatchAliasEvent" returntype="void" access="public" output="false" 
+				hint="I dispatch an event.">
+		<cfargument name="eventAlias" type="string" required="true" 
+					hint="I am the name of the event to be handled." />
+		<cfargument name="event" type="edmund.framework.Event" required="true" 
+					hint="I am the event to be handled." />
+
+		<cfset variables.handler.handleEvent(arguments.eventAlias,arguments.event) />
 
 	</cffunction>
 	

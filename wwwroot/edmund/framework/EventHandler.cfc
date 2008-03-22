@@ -73,12 +73,12 @@
 	
 	<cffunction name="handleEvent" returntype="void" access="public" output="false" 
 				hint="I handle an event by invoking any registered listeners.">
+		<cfargument name="eventName" type="string" required="true" 
+					hint="I am the name of the event to be handled." />	
 		<cfargument name="event" type="edmund.framework.Event" required="true" 
-					hint="I am the event to be handled." />
+					hint="I am the event data to be used by the handler." />
 
-		<cfset var i = 0 />
-		<cfset var n = 0 />
-		<cfset var name = arguments.event.getName() />
+		<cfset var name = arguments.eventName />
 		<cfset var handler = 0 />
 		
 		<cfif structKeyExists(variables.registry,name)>
@@ -95,9 +95,7 @@
 			
 			<cftry>
 
-				<cfset n = arrayLen(variables.registry[name]) />
-				<cfloop index="i" from="1" to="#n#">
-					<cfset handler = variables.registry[name][i] />
+				<cfloop index="handler" array="#variables.registry[name]#">
 					<cfif handler.async>
 						<cfset variables.threadingModel.asyncInvoke(handler.listener,handler.method,arguments.event) />
 					<cfelse>
