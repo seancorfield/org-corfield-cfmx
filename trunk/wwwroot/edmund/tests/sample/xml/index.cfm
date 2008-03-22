@@ -10,4 +10,4 @@
 <!--- fire the Mach-II style event-handler --->
 <cfset application.edmund.dispatch("mach") />
 <!--- fire the Model-Glue style event-handler --->
-<cfset application.edmund.dispatch("mg") />
+<cfset application.edmund.dispatch("model") />

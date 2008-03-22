@@ -58,11 +58,8 @@
 		<cfset var items = xmlSearch(arguments.parsedXML,"//listeners/listener") />
 		<cfset var item = 0 />
 		<cfset var obj = 0 />
-		<cfset var n = arrayLen(items) />
-		<cfset var i = 0 />
 		
-		<cfloop index="i" from="1" to="#n#">
-			<cfset item = items[i] />
+		<cfloop index="item" array="#items#">
 			<!--- name, type|bean --->
 			<cfif not structKeyExists(item.xmlAttributes,"name")>
 				<cfthrow type="edmund.missingAttribute" 
@@ -110,15 +107,10 @@
 		<cfset var item = 0 />
 		<cfset var async = false />
 		<cfset var obj = 0 />
-		<cfset var n = arrayLen(items) />
-		<cfset var i = 0 />
 		<cfset var children = 0 />
-		<cfset var nc = 0 />
-		<cfset var ic = 0 />
 		<cfset var child = 0 />
 		
-		<cfloop index="i" from="1" to="#n#">
-			<cfset item = items[i] />
+		<cfloop index="item" array="#items#">
 			<!--- name, multithreaded (optional: false) --->
 			<cfif not structKeyExists(item.xmlAttributes,"name")>
 				<cfthrow type="edmund.missingAttribute" 
@@ -137,9 +129,7 @@
 				</cfif>
 			</cfif>
 			<!--- children(subscribe): listener, method --->
-			<cfset nc = arrayLen(item.xmlChildren) />
-			<cfloop index="ic" from="1" to="#nc#">
-				<cfset child = item.xmlChildren[ic] />
+			<cfloop index="child" array="#item.xmlChildren#">
 				<cfif child.xmlName is "subscribe">
 					<cfif not structKeyExists(child.xmlAttributes,"listener")>
 						<cfthrow type="edmund.missingAttribute" 
@@ -177,15 +167,10 @@
 		<cfset var item = 0 />
 		<cfset var obj = 0 />
 		<cfset var async = false />
-		<cfset var n = arrayLen(items) />
-		<cfset var i = 0 />
 		<cfset var children = 0 />
-		<cfset var nc = 0 />
-		<cfset var ic = 0 />
 		<cfset var child = 0 />
 		
-		<cfloop index="i" from="1" to="#n#">
-			<cfset item = items[i] />
+		<cfloop index="item" array="#items#">
 			<!--- name, type|bean --->
 			<cfif not structKeyExists(item.xmlAttributes,"name")>
 				<cfthrow type="edmund.missingAttribute" 
@@ -221,9 +206,7 @@
 						detail="#parsedXML.xmlRoot.xmlName#>controllers>controller '#item.xmlAttributes.name#' missing 'type' or 'bean' attribute in '#variables.file#'" />
 			</cfif>
 			<!--- children(message-listener): message, function --->
-			<cfset nc = arrayLen(item.xmlChildren) />
-			<cfloop index="ic" from="1" to="#nc#">
-				<cfset child = item.xmlChildren[ic] />
+			<cfloop index="child" array="#item.xmlChildren#">
 				<cfif child.xmlName is "message-listener">
 					<cfif not structKeyExists(child.xmlAttributes,"message")>
 						<cfthrow type="edmund.missingAttribute" 
@@ -265,19 +248,18 @@
 
 		<cfset var items = xmlSearch(arguments.parsedXML,"//event-handlers/event-handler") />
 		<cfset var item = 0 />
-		<cfset var obj = 0 />
-		<cfset var n = arrayLen(items) />
-		<cfset var i = 0 />
-		<cfset var children = 0 />
-		<cfset var nc = 0 />
-		<cfset var ic = 0 />
+		<cfset var events = 0 />
 		<cfset var child = 0 />
+		<cfset var broadcast = 0 />
+		<cfset var name = 0 />
+		<cfset var msgId = "" />
 		
-		<cfloop index="i" from="1" to="#n#">
-			<cfset item = items[i] />
+		<cfloop index="item" array="#items#">
 			<!--- name|event --->
 			<cfif structKeyExists(item.xmlAttributes,"name")>
+				<cfset name = item.xmlAttributes.name />
 			<cfelseif structKeyExists(item.xmlAttributes,"event")>
+				<cfset name = item.xmlAttributes.event />
 			<cfelse>
 				<cfthrow type="edmund.missingAttribute" 
 						message="'name' or 'event is required on 'event-handler' declaration" 
@@ -290,10 +272,68 @@
 					broadcasts:
 						children(message): name
 			--->
-			<cfset nc = arrayLen(item.xmlChildren) />
-			<cfloop index="ic" from="1" to="#nc#">
-				<cfset child = item.xmlChildren[ic] />
+			<cfset events = "" />
+			<cfloop index="child" array="#item.xmlChildren#">
+				<cfif child.xmlName is "notify">
+					
+					<cfif not structKeyExists(child.xmlAttributes,"listener")>
+						<cfthrow type="edmund.missingAttribute" 
+								message="'listener' is required on 'notify' declaration" 
+								detail="#parsedXML.xmlRoot.xmlName#>event-handlers>event-handler>notify missing 'listener' attribute in '#variables.file#'" />
+					<cfelseif not structKeyExists(variables.listeners,child.xmlAttributes.listener)>
+						<cfthrow type="edmund.illegalAttribute" 
+								message="'#child.xmlAttributes.listener#' is an unknown listener" 
+								detail="#parsedXML.xmlRoot.xmlName#>event-handlers>event-handler>notify '#child.xmlAttributes.listener#' was not declared as a listener in '#variables.file#'" />
+					</cfif>
+					<cfif not structKeyExists(child.xmlAttributes,"method")>
+						<cfthrow type="edmund.missingAttribute" 
+								message="'method' is required on 'notify' declaration" 
+								detail="#parsedXML.xmlRoot.xmlName#>event-handlers>event-handler>notify missing 'method' attribute in '#variables.file#'" />
+					</cfif>
+
+					<!--- create unique msg id and register listener for it --->
+					<cfset msgId = createUUID() />
+					<cfset variables.edmund.register(msgId,variables.listeners[child.xmlAttributes.listener],child.xmlAttributes.method,false) />
+					<!--- add unique msg id to events --->
+					<cfset events = listAppend(events,msgId) />
+
+				<cfelseif child.xmlName is "publish">
+
+					<cfif not structKeyExists(child.xmlAttributes,"message")>
+						<cfthrow type="edmund.missingAttribute" 
+								message="'message' is required on 'publish' declaration" 
+								detail="#parsedXML.xmlRoot.xmlName#>event-handlers>event-handler>publish missing 'message' attribute in '#variables.file#'" />
+					</cfif>
+
+					<!--- add msg to events --->
+					<cfset events = listAppend(events,child.xmlAttributes.message) />
+
+				<cfelseif child.xmlName is "broadcasts">
+
+					<!--- add each child to events --->
+					<cfloop index="broadcast" array="#child.xmlChildren#">
+					
+						<cfif broadcast.xmlName is not "message">
+							<cfthrow type="edmund.unexpectedDeclaration" 
+									message="Unexpected '#broadcast.xmlName#' declaration found in 'broadcasts' declaration" 
+									detail="#parsedXML.xmlRoot.xmlName#>event-handlers>event-handler>broadcasts>#broadcast.xmlName# is illegal inside a 'broadcasts' declaration in '#variables.file#'" />
+						</cfif>
+						<cfif not structKeyExists(broadcast.xmlAttributes,"name")>
+							<cfthrow type="edmund.missingAttribute" 
+									message="'name' is required on 'message' declaration" 
+									detail="#parsedXML.xmlRoot.xmlName#>event-handlers>event-handler>broadcasts>message missing 'name' attribute in '#variables.file#'" />
+						</cfif>
+						
+						<cfset events = listAppend(events,broadcast.xmlAttributes.name) />
+
+					</cfloop>
+
+				</cfif>
 			</cfloop>
+
+			<!--- create the EventSequence listener for the event --->
+			<cfset variables.edmund.register(name,createObject("component","edmund.framework.EventSequence").init(events,variables.edmund),"fireEvents",false) />
+
 		</cfloop>
 
 	</cffunction>
