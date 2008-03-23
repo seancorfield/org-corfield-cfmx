@@ -28,6 +28,8 @@
 		<cfset variables.handler = createObject("component","edmund.framework.EventHandler").init(arguments.maximumEventDepth,arguments.ignoreAsync) />
 		<cfset variables.loader = createObject("component","edmund.framework.Loader").init(this) />
 		
+		<cfset this.workflow = createObject("component","edmund.framework.workflow.Factory").init() />
+		
 		<cfreturn this />
 			
 	</cffunction>
@@ -86,7 +88,7 @@
 		<cfargument name="event" type="edmund.framework.Event" required="true" 
 					hint="I am the event to be handled." />
 
-		<cfset variables.handler.handleEvent(arguments.event.getName(),arguments.event) />
+		<cfset dispatchAliasEvent(arguments.event.getName(),arguments.event) />
 
 	</cffunction>
 	

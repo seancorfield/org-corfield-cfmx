@@ -293,7 +293,7 @@
 
 					<!--- create unique msg id and register listener for it --->
 					<cfset msgId = createUUID() />
-					<cfset variables.edmund.register(msgId,variables.listeners[child.xmlAttributes.listener],child.xmlAttributes.method,false) />
+					<cfset variables.edmund.register(msgId,variables.listeners[child.xmlAttributes.listener],child.xmlAttributes.method) />
 					<!--- add unique msg id to events --->
 					<cfset events = listAppend(events,msgId) />
 
@@ -332,7 +332,7 @@
 			</cfloop>
 
 			<!--- create the EventSequence listener for the event --->
-			<cfset variables.edmund.register(name,createObject("component","edmund.framework.EventSequence").init(events,variables.edmund),"fireEvents",false) />
+			<cfset variables.edmund.register(name,createObject("component","edmund.framework.EventSequence").init(events,variables.edmund)) />
 
 		</cfloop>
 

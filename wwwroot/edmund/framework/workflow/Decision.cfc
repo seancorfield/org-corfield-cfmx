@@ -19,9 +19,9 @@
 <cfcomponent implements="ICommand" output="false">
 	
 	<cffunction name="init" returntype="any" access="public" output="false" hint="">
-		<cfargument name="condition" type="any" required="true" />
-		<cfargument name="ifTrue" type="any" required="true" />
-		<cfargument name="else" type="any" required="false" />
+		<cfargument name="condition" type="edmund.framework.workflow.ICommand" required="true" />
+		<cfargument name="ifTrue" type="edmund.framework.workflow.ICommand" required="true" />
+		<cfargument name="else" type="edmund.framework.workflow.ICommand" required="false" />
 				
 		<cfset variables.condition = arguments.condition />
 		<cfset variables.ifTrue = arguments.ifTrue />
@@ -33,16 +33,20 @@
 		
 	</cffunction>
 	
-	<cffunction name="do" returntype="void" access="public" output="false" hint="">
-		<cfargument name="context" type="struct" required="true" />
+	<cffunction name="handleEvent" returntype="boolean" access="public" output="false" hint="">
+		<cfargument name="event" type="edmund.framework.Event" required="true" />
 
-		<cfif variables.condition.do(arguments.context)>
+		<cfif variables.condition.handleEvent(arguments.event)>
 
-			<cfset variables.ifTrue.do(arguments.context) />
+			<cfreturn variables.ifTrue.handleEvent(arguments.event) />
 
 		<cfelseif structKeyExists(variables,"else")>
 
-			<cfset variables.else.do(arguments.context) />
+			<cfreturn variables.else.handleEvent(arguments.event) />
+			
+		<cfelse>
+		
+			<cfreturn true />
 
 		</cfif>
 

@@ -1,4 +1,5 @@
-<cfcomponent output="false">
+<!--- extends ICommand because we're using it in workflow as well as being just a regular event handler --->
+<cfcomponent implements="edmund.framework.workflow.ICommand" output="false">
 	
 	<cffunction name="init" returntype="any" access="public" output="false">
 		
@@ -6,9 +7,9 @@
 			
 	</cffunction>
 	
-	<cffunction name="handleEvent" returntype="void" access="public" output="false" 
+	<cffunction name="handleEvent" returntype="boolean" access="public" output="false" 
 				hint="I handle an event - I just log the information.">
-		<cfargument name="event" type="any" required="true" 
+		<cfargument name="event" type="edmund.framework.Event" required="true" 
 					hint="I am the event to be handled." />
 
 		<cfset var i = 0 />
@@ -22,6 +23,8 @@
 				<cflog application="true" text="logger.handleEvent() - #i# = #values[i].toString()#" type="information" log="application" />
 			</cfif>
 		</cfloop>
+		
+		<cfreturn true />
 
 	</cffunction>
 
