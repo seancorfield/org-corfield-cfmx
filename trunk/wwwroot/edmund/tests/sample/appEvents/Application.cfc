@@ -71,14 +71,16 @@
 	</cffunction>
 
 	<cffunction name="onError">
-		<cfargument name="exception" required="false" />
-		<cfargument name="eventName" type="string" required="false" />
+		<cfargument name="exception" required="true" />
+		<cfargument name="eventName" type="string" required="true" />
 						
 		<!--- if an exception occurred during onSessionEnd or onApplicationEnd, edmund is in variables scope --->
 		<cfif structKeyExists(variables,"edmund")>
 			<cfset variables.edmund.onError(arguments.exception,arguments.eventName) />
-		<cfelse>
+		<cfelseif isDefined("application") and structKeyExists(application,"edmund")>
 			<cfset application.edmund.onError(arguments.exception,arguments.eventName) />
+		<cfelse>
+			<cfthrow object="#arguments.exception#" />
 		</cfif>
 		
 	</cffunction>

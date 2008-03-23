@@ -18,8 +18,8 @@
 
 <cfinterface>
 
-	<cffunction name="do" returntype="void" access="public" output="false" hint="">
-		<cfargument name="context" type="struct" required="true" />
+	<cffunction name="handleEvent" returntype="boolean" access="public" output="false" hint="">
+		<cfargument name="event" type="edmund.framework.Event" required="true" />
 	</cffunction>
 
 </cfinterface>

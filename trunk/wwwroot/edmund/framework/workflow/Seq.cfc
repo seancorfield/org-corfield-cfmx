@@ -19,24 +19,30 @@
 <cfcomponent implements="ICommand" output="false">
 
 	<cffunction name="init" returntype="any" access="public" output="false" hint="">
-		<cfargument name="cmdArray" type="array" required="true" />
+		<cfargument name="commandArray" type="array" required="true" hint="edmund.framework.workflow.ICommand[]" />
 			
-		<cfset variables.cmdArray = arguments.cmdArray />
+		<cfset variables.commandArray = arguments.commandArray />
 		
 		<cfreturn this />
 		
 	</cffunction>
 	
-	<cffunction name="do" returntype="void" access="public" output="false" hint="">
-		<cfargument name="context" type="struct" required="true" />
+	<cffunction name="handleEvent" returntype="boolean" access="public" output="false" hint="">
+		<cfargument name="event" type="edmund.framework.Event" required="true" />
 
-		<cfset var cmd = 0 />
+		<cfset var command = 0 />
+		<cfset var result = true />
 		
-		<cfloop index="cmd" array="#variables.cmdArray#">
+		<cfloop index="command" array="#variables.commandArray#">
 
-			<cfset cmd.do(arguments.context) />
+			<cfset result = result and command.handleEvent(arguments.event) />
+			<cfif not result>
+				<cfbreak />
+			</cfif>
 
 		</cfloop>
+		
+		<cfreturn result />
 		
 	</cffunction>
 

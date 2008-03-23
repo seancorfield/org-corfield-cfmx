@@ -29,7 +29,7 @@
 			
 	</cffunction>
 
-	<cffunction name="fireEvents" returntype="void" access="public" output="false" hint="I am the event listener.">
+	<cffunction name="handleEvent" returntype="void" access="public" output="false" hint="I am the event listener.">
 		<cfargument name="event" type="any" required="true" />
 		
 		<cfset var item = "" />
