@@ -35,13 +35,36 @@
 					hint="I am the full filesystem path of the XML file to load.">
 
 		<cfset var rawXML = 0 />
-		<cfset var parsedXML = 0 />
 		
 		<cfset variables.file = arguments.file />
 		
 		<cffile action="read" file="#arguments.file#" variable="rawXML" />
 		
-		<cfset parsedXML = xmlParse(rawXML) />
+		<cfset loadDefinitions(rawXML) />
+		
+	</cffunction>
+
+	<cffunction name="loadXML" returntype="void" access="public" output="false" hint="I load and parse a XML string or object.">
+		<cfargument name="xmlData" type="any" required="true" 
+					hint="I am the XML string or object from which to load the definitions.">
+		
+		<cfset variables.file = "-- XML Data --" />
+		
+		<cfset loadDefinitions(arguments.xmlData) />
+		
+	</cffunction>
+
+	<cffunction name="loadDefinitions" returntype="void" access="private" output="false" hint="I load and parse a XML string or object.">
+		<cfargument name="xmlData" type="any" required="true" 
+					hint="I am the XML string or object from which to load the definitions.">
+
+		<cfset var parsedXML = 0 />
+
+		<cfif isSimpleValue(arguments.xmlData)>
+			<cfset parsedXML = xmlParse(arguments.xmlData) />
+		<cfelse>
+			<cfset parsedXML = arguments.xmlData />
+		</cfif>	
 
 		<cfset loadListeners(parsedXML) />
 		<cfset loadSubscribers(parsedXML) />

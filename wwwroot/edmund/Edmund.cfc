@@ -27,14 +27,13 @@
 		
 		<cfset variables.handler = createObject("component","edmund.framework.EventHandler").init(arguments.maximumEventDepth,arguments.ignoreAsync) />
 		<cfset variables.loader = createObject("component","edmund.framework.Loader").init(this) />
-		
-		<cfset this.workflow = createObject("component","edmund.framework.workflow.Factory").init() />
+		<cfset variables.workflow = createObject("component","edmund.framework.workflow.Factory").init() />
 		
 		<cfreturn this />
 			
 	</cffunction>
 	
-	<!--- XML file loader --->
+	<!--- XML loaders --->
 	<cffunction name="load" returntype="any" access="public" output="false" 
 				hint="I load event / listener definitions from an XML file.">
 		<cfargument name="file" type="string" required="true" 
@@ -43,6 +42,24 @@
 		<cfset variables.loader.load(arguments.file) />
 		
 		<cfreturn this />
+	
+	</cffunction>
+	
+	<cffunction name="loadXML" returntype="any" access="public" output="false" 
+				hint="I load event / listener definitions from an XML string or object.">
+		<cfargument name="xmlData" type="any" required="true" 
+					hint="I am the XML string or object from which to load the definitions.">
+	
+		<cfset variables.loader.loadXML(arguments.xmlData) />
+		
+		<cfreturn this />
+	
+	</cffunction>
+	
+	<!--- retrieve workflow factory --->
+	<cffunction name="getWorkflow" returntype="any" access="public" output="false" hint="I return the workflow factory.">
+	
+		<cfreturn variables.workflow />
 	
 	</cffunction>
 	
