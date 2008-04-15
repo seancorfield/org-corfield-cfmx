@@ -74,7 +74,7 @@
 
 		<!--- auto-register ourself as the after update / delete event listener --->
 		<cfset arguments.transfer.addAfterUpdateObserver(this) />
-		<cfset arguments.transfer.addDeleteUpdateObserver(this) />
+		<cfset arguments.transfer.addAfterDeleteObserver(this) />
 
 		<cfreturn this />
 
