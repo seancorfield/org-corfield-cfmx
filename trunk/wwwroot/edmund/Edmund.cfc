@@ -74,7 +74,7 @@
 	</cffunction>
 	
 	<!--- registration point for listeners --->
-	<cffunction name="register" returntype="void" access="public" output="false" 
+	<cffunction name="register" returntype="any" access="public" output="false" 
 				hint="I register a new event handler.">
 		<cfargument name="eventName" type="string" required="true" 
 					hint="I am the event to listen for." />
@@ -86,6 +86,8 @@
 					hint="I specify whether the listener should be invoked asynchronously." />
 
 		<cfset variables.handler.addListener(argumentCollection=arguments) />
+		
+		<cfreturn this />
 		
 	</cffunction>
 	
