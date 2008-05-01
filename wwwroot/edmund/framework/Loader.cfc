@@ -22,8 +22,11 @@
 				hint="I am the constructor.">
 		<cfargument name="edmund" type="edmund.Edmund" required="true" 
 					hint="I am the framework entry point.">
+		<cfargument name="logger" type="edmund.framework.Logger" required="true" 
+					hint="I am the logging component." />
 		
 		<cfset variables.edmund = arguments.edmund />
+		<cfset variables.logger = arguments.logger />
 		<cfset variables.listeners = structNew() />
 		
 		<cfreturn this />
