@@ -1,7 +1,11 @@
 <cfcomponent hint="I am the workflow object factory." output="false">
 
 	<cffunction name="init" returntype="any" access="public" output="false" hint="I am the constructor.">
-	
+		<cfargument name="logger" type="edmund.framework.Logger" required="true" 
+					hint="I am the logging component." />
+
+		<cfset variables.logger = arguments.logger />
+
 		<cfreturn this />
 	
 	</cffunction>

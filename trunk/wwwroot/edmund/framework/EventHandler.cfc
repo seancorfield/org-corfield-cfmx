@@ -26,9 +26,12 @@
 					hint="I am the new maximum event nesting depth." />
 		<cfargument name="ignoreAsync" type="boolean" required="true"
 					hint="I indicate whether async mode should fallback to sync mode on servers that do not support it." />
+		<cfargument name="logger" type="edmund.framework.Logger" required="true" 
+					hint="I am the logging component." />
 
 		<cfset variables.maximumEventDepth = arguments.maximumEventDepth />
 		<cfset variables.ignoreAsync = arguments.ignoreAsync />
+		<cfset variables.logger = arguments.logger />
 		<cfset setUpThreadingModel() />
 
 		<cfreturn this />
@@ -68,6 +71,8 @@
 			</cfif>
 			<cfset arrayAppend(variables.registry[arguments.eventName],tuple) />
 		</cflock>
+		
+		<cfset variables.logger.info("Registered listener for event '#arguments.eventName#'") />
 
 	</cffunction>
 	
@@ -83,6 +88,8 @@
 		
 		<cfif structKeyExists(variables.registry,name)>
 
+			<cfset variables.logger.warn("Handling event '#name#'") />
+		
 			<cfparam name="request.__edmund_event_handling" default="#structNew()#" />
 			<cfif structKeyExists(request.__edmund_event_handling,name) and
 					request.__edmund_event_handling[name]>
@@ -114,6 +121,10 @@
 
 			<cfset request.__edmund_event_handling[name] = false />
 			
+		<cfelse>
+		
+			<cfset variables.logger.warn("No listener registered for event '#name#'") />
+		
 		</cfif>
 
 	</cffunction>
@@ -127,12 +138,18 @@
 			<cfif listFirst(server.ColdFusion.ProductVersion) gte 8>
 				<cfset variables.serverSupportsThreading = true />
 				<cfset variables.threadingModel = createObject("component","edmund.framework.coldfusion.Threading").init(this) />
+				<cfset variables.logger.info("Using ColdFusion threading model") />
 			</cfif>
 		<cfelseif server.ColdFusion.ProductName is "bluedragon">
 			<cfif listFirst(server.ColdFusion.ProductVersion) gte 7>
 				<cfset variables.serverSupportsThreading = true />
 				<cfset variables.threadingModel = createObject("component","edmund.framework.bluedragon.Threading").init(this) />
+				<cfset variables.logger.info("Using BlueDragon threading model") />
 			</cfif>
+		</cfif>
+		
+		<cfif threadingIsNotSupported()>
+			<cfset variables.logger.info("No threading model available") />
 		</cfif>
 		
 	</cffunction>
