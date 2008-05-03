@@ -77,7 +77,7 @@
 	<cffunction name="loadEdmund" returntype="void" access="private" output="false">
 			
 		<!--- create a handler: it can be local, Edmund keeps a reference to it once it is registered --->
-		<cfset var logger = createObject("component","logger").init() />
+		<cfset var logger = createObject("component","logger").init("application") />
 
 		<!--- create edmund system: ignoreAsync if server does not support it --->
 		<cfset application.edmund = createObject("component","edmund.Edmund").init(ignoreAsync=true,logging="edmund") />

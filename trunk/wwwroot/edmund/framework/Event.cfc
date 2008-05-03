@@ -20,6 +20,7 @@
 	
 	<cfset variables.eventName = "[unnamed event]" />
 	<cfset variables.eventValues = structNew() />
+	<cfset variables.bubbleUp = false />
 	
 	<cffunction name="init" returntype="any" access="public" output="false" 
 				hint="I am the event constructor.">
@@ -29,9 +30,13 @@
 					hint="I am the name of this event." />
 		<cfargument name="eventValues" type="struct" default="#structNew()#" 
 					hint="I am the optional initial values for this event." />
+		<cfargument name="bubble" type="boolean" default="false"
+					hint="I indicate whether this event should bubble up after being handled." />
 
 		<cfset variables.edmund = arguments.edmund />
 		<cfset variables.eventName = arguments.eventName />
+		<cfset variables.bubbleUp = arguments.bubble />
+		<!--- we always reuse the same struct and copy in event values to prevent accidental overwriting of other event object contents --->
 		<cfset structClear(variables.eventValues) />
 		<cfset structAppend(variables.eventValues,arguments.eventValues) />
 
@@ -43,6 +48,19 @@
 				hint="I return a shallow copy of all the event values.">
 	
 		<cfreturn structCopy(variables.eventValues) />
+	
+	</cffunction>
+	
+	<cffunction name="bubble" returntype="any" access="public" output="false">
+		<cfargument name="bubbleUp" type="string" required="false" 
+					hint="I am the new bubble up setting. If omitted, this method returns the current bubble up setting." />
+	
+		<cfif structKeyExists(arguments,"bubbleUp")>
+			<cfset variables.bubbleUp = arguments.bubbleUp />
+			<cfreturn this />
+		<cfelse>
+			<cfreturn variables.bubbleUp />
+		</cfif>
 	
 	</cffunction>
 	
@@ -62,7 +80,8 @@
 	</cffunction>
 
 	<cffunction name="name" returntype="any" access="public" output="false">
-		<cfargument name="eventName" type="string" required="false" hint="I am the new name for the event. If omitted, this method is returns the current event name." />
+		<cfargument name="eventName" type="string" required="false" 
+					hint="I am the new name for the event. If omitted, this method returns the current event name." />
 	
 		<cfif structKeyExists(arguments,"eventName")>
 			<cfset variables.eventName = arguments.eventName />
