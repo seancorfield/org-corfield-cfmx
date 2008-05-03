@@ -20,15 +20,13 @@
 
 	<!--- constructor --->
 	<cffunction name="init" returntype="any" access="public" output="false" hint="I am the framework constructor.">
-		<cfargument name="maximumEventDepth" type="numeric" default="10"
-					hint="I am the maximum event nesting depth." />
 		<cfargument name="ignoreAsync" type="boolean" default="false"
 					hint="I indicate whether async mode should fallback to sync mode on servers that do not support it." />
 		<cfargument name="logging" type="string" default="" 
 					hint="I indicate if or where to do logging: I can be empty - no logging - or the name of a log file." />
 		
 		<cfset variables.logger = createObject("component","edmund.framework.Logger").init(arguments.logging) />
-		<cfset variables.handler = createObject("component","edmund.framework.EventHandler").init(arguments.maximumEventDepth,arguments.ignoreAsync,variables.logger) />
+		<cfset variables.handler = createObject("component","edmund.framework.EventHandler").init(arguments.ignoreAsync,variables.logger) />
 		<cfset variables.loader = createObject("component","edmund.framework.Loader").init(this,variables.logger) />
 		<cfset variables.workflow = createObject("component","edmund.framework.workflow.Factory").init(variables.logger) />
 		
