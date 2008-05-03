@@ -23,7 +23,7 @@
 	<cffunction name="loadEdmund" returntype="void" access="private" output="false">
 			
 		<!--- create edmund system: ignoreAsync if server does not support it --->
-		<cfset application.edmund = createObject("component","edmund.Edmund").init(ignoreAsync=true).load(expandPath("edmund.xml")) />
+		<cfset application.edmund = createObject("component","edmund.Edmund").init(ignoreAsync=true,logging="edmund").load(expandPath("edmund.xml")) />
 		
 	</cffunction>
 

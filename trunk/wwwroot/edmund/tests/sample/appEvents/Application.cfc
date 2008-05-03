@@ -3,24 +3,13 @@
 	
 	<cfset this.name = "edmund_sample_using_application_events" />
 	<cfset this.sessionmanagement = true />
-	<cfset this.sessiontimeout = createTimeSpan(0,0,1,0) />
-	<cfset this.applicationtimeout = createTimeSpan(0,0,2,0) />
+	<cfset this.sessiontimeout = createTimeSpan(0,0,0,10) />
+	<cfset this.applicationtimeout = createTimeSpan(0,0,0,20) />
 
 	<cffunction name="onApplicationStart">
 		
-		<!--- create a handler: it can be local, Edmund keeps a reference to it once it is registered --->
-		<cfset var logger = createObject("component","logger").init() />
-
-		<!--- create edmund system: ignoreAsync if server does not support it --->
-		<cfset application.edmund = createObject("component","edmund.Edmund").init(ignoreAsync=true) />
-		
-		<cfset application.edmund.register("onApplicationStart",logger,"handleEvent",true) />
-		<cfset application.edmund.register("onSessionStart",logger) />
-		<cfset application.edmund.register("onRequestStart",logger,"handleEvent",true) />
-		<cfset application.edmund.register("onRequestEnd",logger) />
-		<cfset application.edmund.register("onSessionEnd",logger,"handleEvent",true) />
-		<cfset application.edmund.register("onApplicationEnd",logger) />
-		<cfset application.edmund.register("onError",logger) />
+		<!--- load and initialize the framework --->
+		<cfset loadEdmund() />
 		
 		<!--- fire the onApplicationStart event --->
 		<cfset application.edmund.onApplicationStart() />
@@ -37,7 +26,7 @@
 		<cfargument name="targetPage" type="string" required="false" />
 		
 		<cfif structKeyExists(URL,"reload") and URL.reload>
-			<cfset onApplicationStart() />
+			<cfset loadEdmund() />
 		</cfif>
 					
 		<cfset application.edmund.onRequestStart(arguments.targetPage) />
@@ -70,7 +59,7 @@
 		
 	</cffunction>
 
-	<cffunction name="xonError">
+	<cffunction name="onError">
 		<cfargument name="exception" required="true" />
 		<cfargument name="eventName" type="string" required="true" />
 						
@@ -82,6 +71,24 @@
 		<cfelse>
 			<cfthrow object="#arguments.exception#" />
 		</cfif>
+		
+	</cffunction>
+
+	<cffunction name="loadEdmund" returntype="void" access="private" output="false">
+			
+		<!--- create a handler: it can be local, Edmund keeps a reference to it once it is registered --->
+		<cfset var logger = createObject("component","logger").init() />
+
+		<!--- create edmund system: ignoreAsync if server does not support it --->
+		<cfset application.edmund = createObject("component","edmund.Edmund").init(ignoreAsync=true,logging="edmund") />
+		
+		<cfset application.edmund.register("onApplicationStart",logger,"handleEvent",true) />
+		<cfset application.edmund.register("onSessionStart",logger) />
+		<cfset application.edmund.register("onRequestStart",logger,"handleEvent",true) />
+		<cfset application.edmund.register("onRequestEnd",logger) />
+		<cfset application.edmund.register("onSessionEnd",logger,"handleEvent",true) />
+		<cfset application.edmund.register("onApplicationEnd",logger) />
+		<cfset application.edmund.register("onError",logger) />
 		
 	</cffunction>
 

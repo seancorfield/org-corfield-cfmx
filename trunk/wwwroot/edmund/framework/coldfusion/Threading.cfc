@@ -38,8 +38,10 @@
 		<cfargument name="event" type="edmund.framework.Event" required="true" 
 					hint="I am the event to be handled." />
 
-		<!--- if we're inside a cfthread, run synchronously --->
-		<cfif variables.javaThread.currentThread().getThreadGroup().getName() eq "cfthread">
+		<cfset var threadName = variables.javaThread.currentThread().getThreadGroup().getName() />
+
+		<!--- if we're inside a cfthread or other asynchronous event, run synchronously --->
+		<cfif threadName eq "cfthread" or threadName eq "scheduler">
 
 			<cfinvoke component="#arguments.object#" method="#arguments.method#">
 				<cfinvokeargument name="event" value="#arguments.event#" />

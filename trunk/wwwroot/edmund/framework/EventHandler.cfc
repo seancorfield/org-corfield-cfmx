@@ -22,14 +22,11 @@
 	
 	<cffunction name="init" returntype="any" access="public" output="false" 
 				hint="I am the event handler constructor.">
-		<cfargument name="maximumEventDepth" type="numeric" required="true"
-					hint="I am the new maximum event nesting depth." />
 		<cfargument name="ignoreAsync" type="boolean" required="true"
 					hint="I indicate whether async mode should fallback to sync mode on servers that do not support it." />
 		<cfargument name="logger" type="edmund.framework.Logger" required="true" 
 					hint="I am the logging component." />
 
-		<cfset variables.maximumEventDepth = arguments.maximumEventDepth />
 		<cfset variables.ignoreAsync = arguments.ignoreAsync />
 		<cfset variables.logger = arguments.logger />
 		<cfset setUpThreadingModel() />
@@ -88,7 +85,7 @@
 		
 		<cfif structKeyExists(variables.registry,name)>
 
-			<cfset variables.logger.warn("Handling event '#name#'") />
+			<cfset variables.logger.info("Handling event '#name#'") />
 		
 			<cfparam name="request.__edmund_event_handling" default="#structNew()#" />
 			<cfif structKeyExists(request.__edmund_event_handling,name) and
