@@ -18,17 +18,38 @@
 
 <cfcomponent hint="I am the main entry point for the framework." output="false">
 
+	<!---
+		the only reason we track children is to keep them accessible from a parent context
+		for GC purposes - you don't want your children to be collected while your parent
+		context is still active
+	--->
+	<cfset variables.parent = 0 />
+	<cfset variables.children = structNew() />
+	<cfset variables.uniqueId = createUUID() />
+	
 	<!--- constructor --->
 	<cffunction name="init" returntype="any" access="public" output="false" hint="I am the framework constructor.">
 		<cfargument name="ignoreAsync" type="boolean" default="false"
 					hint="I indicate whether async mode should fallback to sync mode on servers that do not support it." />
 		<cfargument name="logging" type="string" default="" 
 					hint="I indicate if or where to do logging: I can be empty - no logging - or the name of a log file." />
+		<cfargument name="parent" type="edmund.Edmund" required="false" 
+					hint="I am an optional event context - another instance of Edmund." />
+		
+		<!--- save settings for child/parent creation --->
+		<cfset variables.ignoreAsync = arguments.ignoreAsync />
+		<cfset variables.logging = arguments.logging />
 		
 		<cfset variables.logger = createObject("component","edmund.framework.Logger").init(arguments.logging) />
-		<cfset variables.handler = createObject("component","edmund.framework.EventHandler").init(arguments.ignoreAsync,variables.logger) />
+
 		<cfset variables.loader = createObject("component","edmund.framework.Loader").init(this,variables.logger) />
 		<cfset variables.workflow = createObject("component","edmund.framework.workflow.Factory").init(variables.logger) />
+
+		<cfif structKeyExists(arguments,"parent")>
+			<cfset setParent(arguments.parent) />
+		</cfif>
+
+		<cfset variables.handler = createObject("component","edmund.framework.EventHandler").init(this,arguments.ignoreAsync,variables.logger) />
 		
 		<cfreturn this />
 			
@@ -72,6 +93,58 @@
 					
 		<cfreturn createObject("component",arguments.class).init(this,listLast(arguments.class,".")) />
 
+	</cffunction>
+	
+	<!--- context creation methods --->
+	<cffunction name="newChild" returntype="any" access="public" output="false" hint="I return a new child event context.">
+	
+		<cfreturn createObject("component","edmund.Edmund").init(variables.ignoreAsync,variables.logging,this) />
+	
+	</cffunction>
+	
+	<cffunction name="newParent" returntype="any" access="public" output="false" hint="I return a new parent event context.">
+	
+		<cfset var newParent = createObject("component","edmund.Edmund").init(variables.ignoreAsync,variables.logging) />
+		
+		<cfset setParent(newParent) />
+		
+		<cfreturn newParent />
+	
+	</cffunction>
+	
+	<!--- parent / child convenience methods --->
+	<cffunction name="addChild" returntype="void" access="public" output="false" 
+				hint="I add a new child context (and set this as a parent of that child).">
+		<cfargument name="child" type="any" required="true" hint="I am the new child context." />
+		
+		<cfif not structKeyExists(variables.children,arguments.child.getId())>
+			<cfset variables.children[arguments.child.getId()] = arguments.child />
+			<cfset arguments.child.setParent(this) />
+		</cfif>
+		
+	</cffunction>
+	
+	<cffunction name="getId" returntype="string" access="public" output="false" hint="I return this event context's unique ID.">
+	
+		<cfreturn variables.uniqueId />
+	
+	</cffunction>
+	
+	<cffunction name="getParent" returntype="any" access="public" output="false" hint="I return this event context's parent.">
+	
+		<cfreturn variables.parent />
+	
+	</cffunction>
+	
+	<cffunction name="setParent" returntype="void" access="public" output="false" 
+				hint="I set a parent (and add this child to that parent).">
+		<cfargument name="parent" type="any" required="true" hint="I am the new parent context." />
+		
+		<cfif not isObject(variables.parent) or variables.parent.getId() is not arguments.parent.getId()>
+			<cfset variables.parent = arguments.parent />
+			<cfset variables.parent.addChild(this) />
+		</cfif>
+		
 	</cffunction>
 	
 	<!--- registration point for listeners --->

@@ -22,11 +22,14 @@
 	
 	<cffunction name="init" returntype="any" access="public" output="false" 
 				hint="I am the event handler constructor.">
+		<cfargument name="context" type="any" required="true" 
+					hint="I am the owning context, an instance of Edmund." />
 		<cfargument name="ignoreAsync" type="boolean" required="true"
 					hint="I indicate whether async mode should fallback to sync mode on servers that do not support it." />
 		<cfargument name="logger" type="edmund.framework.Logger" required="true" 
 					hint="I am the logging component." />
 
+		<cfset variables.context = arguments.context />
 		<cfset variables.ignoreAsync = arguments.ignoreAsync />
 		<cfset variables.logger = arguments.logger />
 		<cfset setUpThreadingModel() />
@@ -118,8 +121,21 @@
 
 			<cfset request.__edmund_event_handling[name] = false />
 			
+			<cfif isObject(variables.context.getParent()) and arguments.event.bubble()>
+				
+				<!--- we handled the event but it is set to bubble up and we actually have a parent to send it to --->
+				<cfset variables.context.getParent().dispatchAliasEvent(arguments.eventName,arguments.event) />
+				
+			</cfif>
+			
+		<cfelseif isObject(variables.context.getParent())>
+		
+			<!--- no handler here, try our parent --->
+			<cfset variables.context.getParent().dispatchAliasEvent(arguments.eventName,arguments.event) />
+		
 		<cfelse>
 		
+			<!--- TODO: issue a warning for now - with bubbling we may need to suppress this? --->
 			<cfset variables.logger.warn("No listener registered for event '#name#'") />
 		
 		</cfif>
