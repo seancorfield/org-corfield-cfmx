@@ -13,9 +13,9 @@
 					hint="I am the event to be handled." />
 
 		<cfset var i = 0 />
-		<cfset var values = arguments.event.getAllValues() />
+		<cfset var values = arguments.event.all() />
 		
-		<cflog application="true" text="logger.handleEvent(#arguments.event.getName()#)" type="information" log="application" />
+		<cflog application="true" text="logger.handleEvent(#arguments.event.name()#)" type="information" log="application" />
 		<cfloop item="i" collection="#values#">
 			<cfif isSimpleValue(values[i])>
 				<cflog application="true" text="logger.handleEvent() - #i# = #values[i]#" type="information" log="application" />

@@ -6,11 +6,11 @@
 	logs[2] = logCommand;
 	
 	log2 = application.edmund.getWorkflow().seq(logs);
-	log2.handleEvent( application.edmund.new("workflow") );
+	log2.handleEvent( application.edmund.new() );
 	
 	data = arrayNew(1);
 	for (i = 1; i lte 10; i = i + 1) data[i] = i;
 	
 	log2 = application.edmund.getWorkflow().foreach("iter","x",logCommand);
-	log2.handleEvent( application.edmund.new("foreach").values(iter=data.iterator()) );
+	log2.handleEvent( application.edmund.new().values(iter=data.iterator()) );
 </cfscript>

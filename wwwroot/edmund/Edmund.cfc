@@ -69,10 +69,10 @@
 	<!--- convenience method to create new events by name --->
 	<cffunction name="new" returntype="any" access="public" output="false" 
 				hint="I return a new event.">
-		<cfargument name="name" type="string" required="true" 
-					hint="I am the name of the new event." />
+		<cfargument name="class" type="string" default="edmund.framework.Event" 
+					hint="I am the name of the new event class." />
 					
-		<cfreturn createObject("component","edmund.framework.Event").init(arguments.name) />
+		<cfreturn createObject("component",arguments.class).init(this,listLast(arguments.class,".")) />
 
 	</cffunction>
 	
@@ -100,7 +100,7 @@
 		<cfargument name="eventName" type="string" required="true" 
 					hint="I am the name of the event to be handled." />
 
-		<cfset dispatchEvent( new(arguments.eventName) ) />
+		<cfset dispatchEvent( new().name(arguments.eventName) ) />
 
 	</cffunction>
 	
@@ -110,7 +110,7 @@
 		<cfargument name="event" type="edmund.framework.Event" required="true" 
 					hint="I am the event to be handled." />
 
-		<cfset dispatchAliasEvent(arguments.event.getName(),arguments.event) />
+		<cfset dispatchAliasEvent(arguments.event.name(),arguments.event) />
 
 	</cffunction>
 	
@@ -130,14 +130,14 @@
 	<cffunction name="onApplicationStart"
 				hint="I can be called at the end of onApplicationStart, once all the listeners are registered.">
 		
-		<cfset dispatchEvent( new("onApplicationStart") ) />
+		<cfset dispatchEvent( new().name("onApplicationStart") ) />
 		
 	</cffunction>
 
 	<cffunction name="onSessionStart"
 				hint="I can be called from onSessionStart.">
 		
-		<cfset dispatchEvent( new("onSessionStart") ) />
+		<cfset dispatchEvent( new().name("onSessionStart") ) />
 		
 	</cffunction>
 
@@ -146,7 +146,7 @@
 		<cfargument name="targetPage" type="string" required="false" 
 					hint="I am the targetPage (argument to Application.onRequestStart)." />
 					
-		<cfset dispatchEvent( new("onRequestStart").values(argumentCollection=arguments) ) />
+		<cfset dispatchEvent( new().name("onRequestStart").values(argumentCollection=arguments) ) />
 		
 	</cffunction>
 
@@ -155,7 +155,7 @@
 		<cfargument name="targetPage" type="string" required="false" 
 					hint="I am the targetPage (argument to Application.onRequestEnd)." />
 					
-		<cfset dispatchEvent( new("onRequestEnd").values(argumentCollection=arguments) ) />
+		<cfset dispatchEvent( new().name("onRequestEnd").values(argumentCollection=arguments) ) />
 		
 	</cffunction>
 
@@ -166,7 +166,7 @@
 		<cfargument name="applicationScope" required="false" 
 					hint="I am the applicationScope (argument to Application.onSessionEnd)." />
 					
-		<cfset dispatchEvent( new("onSessionEnd").values(argumentCollection=arguments) ) />
+		<cfset dispatchEvent( new().name("onSessionEnd").values(argumentCollection=arguments) ) />
 		
 	</cffunction>
 
@@ -175,7 +175,7 @@
 		<cfargument name="applicationScope" required="false" 
 					hint="I am the applicationScope (argument to Application.onApplicationEnd)." />
 					
-		<cfset dispatchEvent( new("onApplicationEnd").values(argumentCollection=arguments) ) />
+		<cfset dispatchEvent( new().name("onApplicationEnd").values(argumentCollection=arguments) ) />
 		
 	</cffunction>
 
@@ -186,7 +186,7 @@
 		<cfargument name="eventName" type="string" required="false" 
 					hint="I am the eventName (argument to Application.onError)." />
 					
-		<cfset dispatchEvent( new("onError").values(argumentCollection=arguments) ) />
+		<cfset dispatchEvent( new().name("onError").values(argumentCollection=arguments) ) />
 		
 	</cffunction>
 

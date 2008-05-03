@@ -70,7 +70,7 @@
 		
 	</cffunction>
 
-	<cffunction name="onError">
+	<cffunction name="xonError">
 		<cfargument name="exception" required="true" />
 		<cfargument name="eventName" type="string" required="true" />
 						
