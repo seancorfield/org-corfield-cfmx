@@ -18,54 +18,74 @@
 
 <cfcomponent output="false" hint="I represent an event.">
 	
-	<cfset variables.name = "[unnamed event]" />
-	<cfset variables.values = structNew() />
+	<cfset variables.eventName = "[unnamed event]" />
+	<cfset variables.eventValues = structNew() />
 	
 	<cffunction name="init" returntype="any" access="public" output="false" 
 				hint="I am the event constructor.">
-		<cfargument name="name" type="string" required="true" 
+		<cfargument name="edmund" type="any" required="true" 
+					hint="I am the Edmund framework." />
+		<cfargument name="eventName" type="string" required="true" 
 					hint="I am the name of this event." />
-		<cfargument name="values" type="struct" default="#structNew()#" 
+		<cfargument name="eventValues" type="struct" default="#structNew()#" 
 					hint="I am the optional initial values for this event." />
 
-		<cfset variables.name = arguments.name />
-		<cfset structClear(variables.values) />
-		<cfset structAppend(variables.values,arguments.values) />
+		<cfset variables.edmund = arguments.edmund />
+		<cfset variables.eventName = arguments.eventName />
+		<cfset structClear(variables.eventValues) />
+		<cfset structAppend(variables.eventValues,arguments.eventValues) />
 
 		<cfreturn this />
 			
 	</cffunction>
 	
-	<cffunction name="getName" returntype="string" access="public" output="false">
-	
-		<cfreturn variables.name />
-	
-	</cffunction>
-	
-	<cffunction name="getValue" returntype="any" access="public" output="false" 
-				hint="I return the specified event value.">
-		<cfargument name="name" type="string" required="true" 
-					hint="I am the name of the value to return." />
-	
-		<cfreturn variables.values[arguments.name] />
-	
-	</cffunction>
-	
-	<cffunction name="getAllValues" returntype="struct" access="public" output="false" 
+	<cffunction name="all" returntype="struct" access="public" output="false" 
 				hint="I return a shallow copy of all the event values.">
 	
-		<cfreturn structCopy(variables.values) />
+		<cfreturn structCopy(variables.eventValues) />
 	
 	</cffunction>
 	
-	<cffunction name="setValue" returntype="void" access="public" output="false" 
-				hint="I store a value in the event.">
+	<cffunction name="dispatch" returntype="void" access="public" output="false" hint="I dispatch myself.">
+	
+		<cfset variables.edmund.dispatchEvent(this) />
+	
+	</cffunction>
+	
+	<cffunction name="has" returntype="boolean" access="public" output="false" 
+				hint="I return true iff the specified value exists in the event.">
+		<cfargument name="name" type="string" required="true" 
+					hint="I am the name of the value to test for." />
+
+		<cfreturn structKeyExists(variables.eventValues,arguments.name) />
+
+	</cffunction>
+
+	<cffunction name="name" returntype="any" access="public" output="false">
+		<cfargument name="eventName" type="string" required="false" hint="I am the new name for the event. If omitted, this method is returns the current event name." />
+	
+		<cfif structKeyExists(arguments,"eventName")>
+			<cfset variables.eventName = arguments.eventName />
+			<cfreturn this />
+		<cfelse>
+			<cfreturn variables.eventName />
+		</cfif>
+	
+	</cffunction>
+	
+	<cffunction name="value" returntype="any" access="public" output="false" 
+				hint="I either return a value from the event or store a value in the event.">
 		<cfargument name="name" type="string" required="true" 
 					hint="I am the name of the value to store." />
-		<cfargument name="value" type="any" required="true" 
+		<cfargument name="value" type="any" required="false" 
 					hint="I am the new value to store." />
 			
-		<cfset variables.values[arguments.name] = arguments.value />
+		<cfif structKeyExists(arguments,"value")>
+			<cfset variables.eventValues[arguments.name] = arguments.value />
+			<cfreturn this />
+		<cfelse>
+			<cfreturn variables.eventValues[arguments.name] />
+		</cfif>
 			
 	</cffunction>
 	
@@ -77,7 +97,7 @@
 		<cfloop item="i" collection="#arguments#">
 			<!--- only set named arguments, not positional arguments --->
 			<cfif not isNumeric(i)>
-				<cfset setValue(i,arguments[i]) />
+				<cfset value(i,arguments[i]) />
 			</cfif>
 		</cfloop>
 		
@@ -85,13 +105,4 @@
 
 	</cffunction>
 	
-	<cffunction name="hasValue" returntype="boolean" access="public" output="false" 
-				hint="I return true iff the specified value exists in the event.">
-		<cfargument name="name" type="string" required="true" 
-					hint="I am the name of the value to test for." />
-
-		<cfreturn structKeyExists(variables.values,arguments.name) />
-
-	</cffunction>
-
 </cfcomponent>

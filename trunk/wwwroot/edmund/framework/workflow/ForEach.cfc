@@ -36,9 +36,9 @@
 		
 		<cfset var result = true />
 
-		<cfloop condition="result and arguments.event.getValue(variables.iterator).hasNext()">
+		<cfloop condition="result and arguments.event.value(variables.iterator).hasNext()">
 		
-			<cfset arguments.event.setValue( variables.it, arguments.event.getValue( variables.iterator ).next() ) />
+			<cfset arguments.event.value( variables.it, arguments.event.value( variables.iterator ).next() ) />
 			<cfset result = result and variables.body.handleEvent(arguments.event) />
 		
 		</cfloop>

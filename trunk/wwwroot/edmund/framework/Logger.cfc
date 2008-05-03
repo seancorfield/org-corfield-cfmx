@@ -1,3 +1,21 @@
+<!---
+ 
+  Copyright (c) 2008, Sean Corfield
+  
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+---> 
+
 <cfcomponent hint="I am the logging utility." output="false">
 	
 	<cffunction name="init" returntype="any" access="public" output="false" hint="I am the constructor.">
@@ -22,7 +40,7 @@
 		<cfargument name="text" type="string" required="true" />
 		<cfargument name="application" type="boolean" default="false" />
 
-		<cfset variables.logger(text = arguments.text, application = arguments.application, type = "error") />
+		<cfset variables.logger(arguments.text,arguments.application,"error") />
 		
 	</cffunction>
 
@@ -30,7 +48,7 @@
 		<cfargument name="text" type="string" required="true" />
 		<cfargument name="application" type="boolean" default="false" />
 
-		<cfset variables.logger(text = arguments.text, application = arguments.application, type = "information") />
+		<cfset variables.logger(arguments.text,arguments.application,"information") />
 		
 	</cffunction>
 
@@ -38,7 +56,7 @@
 		<cfargument name="text" type="string" required="true" />
 		<cfargument name="application" type="boolean" default="false" />
 
-		<cfset variables.logger(text = arguments.text, application = arguments.application, type = "warning") />
+		<cfset variables.logger(arguments.text,arguments.application,"warning") />
 		
 	</cffunction>
 
@@ -46,12 +64,18 @@
 	</cffunction>
 
 	<cffunction name="cfLogger" returntype="void" access="private" output="false" hint="I am a CF built-in logger.">
+		<cfargument name="text" type="string" required="true" />
+		<cfargument name="application" type="boolean" default="false" />
+		<cfargument name="type" type="string" required="true" />
 		
 		<cflog application="#arguments.application#" log="#variables.target#" text="#arguments.text#" type="#arguments.type#" />
 		
 	</cffunction>
 
 	<cffunction name="fileLogger" returntype="void" access="private" output="false" hint="I am a file-based logger.">
+		<cfargument name="text" type="string" required="true" />
+		<cfargument name="application" type="boolean" default="false" />
+		<cfargument name="type" type="string" required="true" />
 		
 		<cflog application="#arguments.application#" file="#variables.target#" text="Edmund : #arguments.text#" type="#arguments.type#" />
 		
