@@ -132,9 +132,7 @@
 		<cfelseif left(missingMethodName,3) is "set">
 
 			<cfset name = right(missingMethodName,len(missingMethodName)-3) />
-			<cfif structKeyExists(missingMethodArguments,name)>
-				<cfset variables[name] = missingMethodArguments[name] />
-			<cfelseif structKeyExists(missingMethodArguments,1)>
+			<cfif structCount(missingMethodArguments) gte 1>
 				<cfset variables[name] = missingMethodArguments[1] />
 			<cfelse>
 				<cfthrow type="Application"
