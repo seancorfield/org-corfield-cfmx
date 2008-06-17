@@ -10,7 +10,7 @@
 		</copy>
 	</target>
 	
-	<target name="build" depends="build-cfeclipse,build-closure,build-concurrency,build-ircbot,build-rest,build-scripts">
+	<target name="build" depends="build-cfeclipse,build-closure,build-concurrency,build-ircbot,build-rest,build-scripts,build-edmund">
 		<tstamp>
 			<format property="buildtime" pattern="yyyy-MM-dd'T'HH:mm:ss" />
 		</tstamp>
@@ -50,6 +50,12 @@
 	<target name="build-scripts">
 		<zip destfile="${builds}/scripts.zip">
 			<fileset dir="${source}" includes="org/corfield/scripts/**" />
+		</zip>
+	</target>
+	
+	<target name="build-edmund">
+		<zip destfile="${builds}/edmund.zip">
+			<fileset dir="${source}" includes="edmund/**" />
 		</zip>
 	</target>
 	
