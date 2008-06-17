@@ -51,13 +51,17 @@
 
 			<cfparam name="request.__edmund_thread_id" default="0" />
 			<cfset request.__edmund_thread_id = request.__edmund_thread_id + 1 />
+			<cfset request["__edmund_data_" & request.__edmund_thread_id] = structNew() />
+			<cfset request["__edmund_data_" & request.__edmund_thread_id].object = arguments.object />
+			<cfset request["__edmund_data_" & request.__edmund_thread_id].event = arguments.event />
 
 			<!--- thread name is required and must be unique per thread --->
 			<cfthread action="run" name="edmund_thread_#request.__edmund_thread_id#"
-						object="#arguments.object#" method="#arguments.method#" event="#arguments.event#">
+						method="#arguments.method#">
 	
-				<cfinvoke component="#attributes.object#" method="#attributes.method#">
-					<cfinvokeargument name="event" value="#attributes.event#" />
+				<cfinvoke component="#request['__edmund_data_' & request.__edmund_thread_id].object#" 
+							method="#attributes.method#">
+					<cfinvokeargument name="event" value="#request['__edmund_data_' & request.__edmund_thread_id].event#" />
 				</cfinvoke>
 
 			</cfthread>
