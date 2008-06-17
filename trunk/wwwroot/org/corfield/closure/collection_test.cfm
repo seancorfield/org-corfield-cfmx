@@ -270,3 +270,10 @@ function select(collection,closure) {
 
 <cfdump label="three.asArray()" var="#three.asArray()#" />
 <cfdump label="four.asArray()" var="#four.asArray()#" />
+
+<cfscript>
+a = [ "a", "b", "c", "d" ];
+c = createObject("component","Collection").init(a);
+b = c.collect( "x", 'x & "!"' );
+</cfscript>
+<cfdump label="b.asArray()" var="#b.asArray()#" />
