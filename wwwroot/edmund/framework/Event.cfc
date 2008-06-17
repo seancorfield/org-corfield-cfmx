@@ -39,9 +39,14 @@
 		<!--- we always reuse the same struct and copy in event values to prevent accidental overwriting of other event object contents --->
 		<cfset structClear(variables.eventValues) />
 		<cfset structAppend(variables.eventValues,arguments.eventValues) />
+		
+		<cfset configure() />
 
 		<cfreturn this />
 			
+	</cffunction>
+	
+	<cffunction name="configure" returntype="void" access="public" output="false" hint="Override me to provide initialization logic.">
 	</cffunction>
 	
 	<cffunction name="all" returntype="struct" access="public" output="false" 
