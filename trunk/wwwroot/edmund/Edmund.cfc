@@ -91,7 +91,7 @@
 		<cfargument name="class" type="string" default="edmund.framework.Event" 
 					hint="I am the name of the new event class." />
 					
-		<cfreturn createObject("component",arguments.class).init(this,listLast(arguments.class,".")) />
+		<cfreturn createObject("component",arguments.class).init(this,listLast(arguments.class,"."),arguments) />
 
 	</cffunction>
 	
