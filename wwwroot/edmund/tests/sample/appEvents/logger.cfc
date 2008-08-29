@@ -17,15 +17,15 @@
 
 		<cfset var i = 0 />
 		<cfset var values = arguments.event.all() />
-		
-		<cflog application="true" text="#variables.prefix# : logger.handleEvent(#arguments.event.name()#)" type="information" log="application" />
+		<cfset var logOutput = "#variables.prefix# : logger.handleEvent(#arguments.event.name()#)" />
 		<cfloop item="i" collection="#values#">
 			<cfif isSimpleValue(values[i])>
-				<cflog application="true" text="#variables.prefix# : logger.handleEvent() - #i# = #values[i]#" type="information" log="application" />
+				<cfset logOutput = logOutput & " - #i# = #values[i]#" />
 			<cfelse>
-				<cflog application="true" text="#variables.prefix# : logger.handleEvent() - #i# = #values[i].toString()#" type="information" log="application" />
+				<cfset logOutput = logOutput & " - #i# = #values[i].toString()#" />
 			</cfif>
 		</cfloop>
+		<cflog application="true" text="#logOutput#" type="information" log="application" />
 		
 		<cfreturn true />
 
