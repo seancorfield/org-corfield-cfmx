@@ -85,13 +85,23 @@
 	
 	</cffunction>
 	
-	<!--- convenience method to create new events by name --->
+	<!--- convenience method to create new events by class name --->
 	<cffunction name="new" returntype="any" access="public" output="false" 
-				hint="I return a new event.">
+				hint="I return a new event. Usage: new(className) or new().name(eventName) or new(class=className,otherArgs).name(eventName).">
 		<cfargument name="class" type="string" default="edmund.framework.Event" 
 					hint="I am the name of the new event class." />
 					
 		<cfreturn createObject("component",arguments.class).init(this,listLast(arguments.class,"."),arguments) />
+
+	</cffunction>
+	
+	<!--- convenience method to create new events by event name --->
+	<cffunction name="newEvent" returntype="any" access="public" output="false" 
+				hint="I return a new event. Usage: newEvent(eventName). Equivalent to: new().name(eventName).">
+		<cfargument name="name" type="string" required="true" 
+					hint="I am the name of the new event." />
+		
+		<cfreturn new().name(arguments.name) />
 
 	</cffunction>
 	
@@ -147,9 +157,16 @@
 		
 	</cffunction>
 	
-	<!--- registration point for listeners --->
+	<!--- registration points for listeners --->
+	<cffunction name="addEventListener" returntype="any" access="public" output="false" 
+				hint="I register a new event handler using the Flex approach (but I take an object, not a function). See register() method for usage.">
+
+		<cfreturn register(argumentCollection=arguments) />
+		
+	</cffunction>
+	
 	<cffunction name="register" returntype="any" access="public" output="false" 
-				hint="I register a new event handler.">
+				hint="I register a new event handler using the original Edmund syntax.">
 		<cfargument name="eventName" type="string" required="true" 
 					hint="I am the event to listen for." />
 		<cfargument name="listener" type="any" required="true" 
