@@ -19,10 +19,7 @@
 <cfcomponent hint="I am the ColdFusion 8+ threading model" output="false">
 	
 	<cffunction name="init" returntype="any" access="public" output="false">
-		<cfargument name="eventHandler" type="any" required="true" 
-					hint="I am the Edmund event handler." />
-		
-		<cfset variables.eventHandler = arguments.eventHandler />
+
 		<cfset variables.javaThread = createObject("java","java.lang.Thread") />
 
 		<cfreturn this />
@@ -39,6 +36,7 @@
 					hint="I am the event to be handled." />
 
 		<cfset var threadName = variables.javaThread.currentThread().getThreadGroup().getName() />
+		<cfset var helper = 0 />
 
 		<!--- if we're inside a cfthread or other asynchronous event, run synchronously --->
 		<cfif threadName eq "cfthread" or threadName eq "scheduler">
@@ -48,23 +46,12 @@
 			</cfinvoke>
 
 		<cfelse>
+		
+			<!--- this is done to get around ColdFusion's broken threading model --->
+			<cfset helper = createObject("component","edmund.framework.coldfusion.ThreadingHelper")
+					.init(arguments.object,arguments.method,arguments.event) />
 
-			<cfparam name="request.__edmund_thread_id" default="0" />
-			<cfset request.__edmund_thread_id = request.__edmund_thread_id + 1 />
-			<cfset request["__edmund_data_" & request.__edmund_thread_id] = structNew() />
-			<cfset request["__edmund_data_" & request.__edmund_thread_id].object = arguments.object />
-			<cfset request["__edmund_data_" & request.__edmund_thread_id].event = arguments.event />
-
-			<!--- thread name is required and must be unique per thread --->
-			<cfthread action="run" name="edmund_thread_#request.__edmund_thread_id#"
-						method="#arguments.method#">
-	
-				<cfinvoke component="#request['__edmund_data_' & request.__edmund_thread_id].object#" 
-							method="#attributes.method#">
-					<cfinvokeargument name="event" value="#request['__edmund_data_' & request.__edmund_thread_id].event#" />
-				</cfinvoke>
-
-			</cfthread>
+			<cfset helper.asyncInvoke() />
 
 		</cfif>
 

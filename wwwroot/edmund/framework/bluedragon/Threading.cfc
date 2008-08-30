@@ -19,10 +19,6 @@
 <cfcomponent hint="I am the BlueDragon 7+ threading model" output="false">
 	
 	<cffunction name="init" returntype="any" access="public" output="false">
-		<cfargument name="eventHandler" type="any" required="true" 
-					hint="I am the Edmund event handler." />
-		
-		<cfset variables.eventHandler = arguments.eventHandler />
 
 		<cfreturn this />
 			
