@@ -150,13 +150,13 @@
 		<cfif server.ColdFusion.ProductName is "coldfusion server">
 			<cfif listFirst(server.ColdFusion.ProductVersion) gte 8>
 				<cfset variables.serverSupportsThreading = true />
-				<cfset variables.threadingModel = createObject("component","edmund.framework.coldfusion.Threading").init(this) />
+				<cfset variables.threadingModel = createObject("component","edmund.framework.coldfusion.Threading").init() />
 				<cfset variables.logger.info("Using ColdFusion threading model") />
 			</cfif>
 		<cfelseif server.ColdFusion.ProductName is "bluedragon">
 			<cfif listFirst(server.ColdFusion.ProductVersion) gte 7>
 				<cfset variables.serverSupportsThreading = true />
-				<cfset variables.threadingModel = createObject("component","edmund.framework.bluedragon.Threading").init(this) />
+				<cfset variables.threadingModel = createObject("component","edmund.framework.bluedragon.Threading").init() />
 				<cfset variables.logger.info("Using BlueDragon threading model") />
 			</cfif>
 		</cfif>
