@@ -72,6 +72,15 @@
 		
 	</cffunction>
 
+	<cffunction name="logger" returntype="void" access="private" output="false" hint="I am a CF built-in logger.">
+		<cfargument name="text" type="string" required="true" />
+		<cfargument name="application" type="boolean" default="false" />
+		<cfargument name="type" type="string" required="true" />
+		
+		<cfdump var="[#arguments.application#] TARGET:#variables.target# TEXT:#arguments.text# TYPE:#arguments.TYPE#" output="console" />
+		
+	</cffunction>
+
 	<cffunction name="fileLogger" returntype="void" access="private" output="false" hint="I am a file-based logger.">
 		<cfargument name="text" type="string" required="true" />
 		<cfargument name="application" type="boolean" default="false" />
