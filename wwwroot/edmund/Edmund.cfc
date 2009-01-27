@@ -188,7 +188,11 @@
 		<cfargument name="eventName" type="string" required="true" 
 					hint="I am the name of the event to be handled." />
 
-		<cfset dispatchEvent( new().name(arguments.eventName) ) />
+		<cfset var event = new() />
+		<cfset event.name(arguments.eventName) />
+		<cfset event.requestName(arguments.eventName) />
+		
+		<cfset dispatchEvent( event ) />
 
 	</cffunction>
 	
