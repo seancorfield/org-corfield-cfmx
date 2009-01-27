@@ -277,6 +277,7 @@
 		<cfset var events = 0 />
 		<cfset var child = 0 />
 		<cfset var broadcast = 0 />
+		<cfset var result = 0 />
 		<cfset var name = 0 />
 		<cfset var msgId = "" />
 		
