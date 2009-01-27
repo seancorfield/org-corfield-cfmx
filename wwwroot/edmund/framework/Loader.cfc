@@ -353,6 +353,37 @@
 						<cfset events = listAppend(events,broadcast.xmlAttributes.name) />
 
 					</cfloop>
+				
+				<cfelseif child.xmlName is "announce">
+				
+					<cfif not structKeyExists(child.xmlAttributes,"event")>
+						<cfthrow type="edmund.missingAttribute" 
+								message="'event' is required on 'announce' declaration" 
+								detail="#parsedXML.xmlRoot.xmlName#>event-handlers>event-handler>announce missing 'event' attribute in '#variables.file#'" />
+					</cfif>
+
+					<!--- add msg to events --->
+					<cfset events = listAppend(events,"{event}#child.xmlAttributes.event#") />
+
+				<cfelseif child.xmlName is "results">
+
+					<!--- add each child to events --->
+					<cfloop index="result" array="#child.xmlChildren#">
+					
+						<cfif result.xmlName is not "result">
+							<cfthrow type="edmund.unexpectedDeclaration" 
+									message="Unexpected '#result.xmlName#' declaration found in 'result' declaration" 
+									detail="#parsedXML.xmlRoot.xmlName#>event-handlers>event-handler>results>#result.xmlName# is illegal inside a 'results' declaration in '#variables.file#'" />
+						</cfif>
+						<cfif not structKeyExists(result.xmlAttributes,"do")>
+							<cfthrow type="edmund.missingAttribute" 
+									message="'do' is required on 'result' declaration" 
+									detail="#parsedXML.xmlRoot.xmlName#>event-handlers>event-handler>results>result missing 'do' attribute in '#variables.file#'" />
+						</cfif>
+						
+						<cfset events = listAppend(events,"{event}#result.xmlAttributes.do#") />
+
+					</cfloop>
 
 				</cfif>
 			</cfloop>

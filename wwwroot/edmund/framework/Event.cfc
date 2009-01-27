@@ -19,6 +19,7 @@
 <cfcomponent output="false" hint="I represent an event.">
 	
 	<cfset variables.eventName = "[unnamed event]" />
+	<cfset variables.requestName = "[unnamed event]" />
 	<cfset variables.eventValues = structNew() />
 	<cfset variables.bubbleUp = false />
 	
@@ -35,6 +36,7 @@
 
 		<cfset variables.edmund = arguments.edmund />
 		<cfset variables.eventName = arguments.eventName />
+		<cfset variables.requestName = arguments.eventName />
 		<cfset variables.bubbleUp = arguments.bubble />
 		<!--- we always reuse the same struct and copy in event values to prevent accidental overwriting of other event object contents --->
 		<cfset structClear(variables.eventValues) />
@@ -95,6 +97,20 @@
 			<cfreturn variables.eventName />
 		</cfif>
 	
+	</cffunction>
+	
+	<cffunction name="requestName" returntype="any" access="public" output="false"
+		hint="Sets the event name that started the request lifecycle.">
+		<cfargument name="requestName" type="string" required="false"
+					hint="A request name for this event." />
+					
+		<cfif structKeyExists(arguments,"requestName")>
+			<cfset variables.requestName = arguments.requestName />
+			<cfreturn this />
+		<cfelse>
+			<cfreturn variables.requestName />
+		</cfif>
+		
 	</cffunction>
 	
 	<cffunction name="value" returntype="any" access="public" output="false" 

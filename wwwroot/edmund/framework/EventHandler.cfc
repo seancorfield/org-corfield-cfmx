@@ -85,6 +85,12 @@
 
 		<cfset var name = arguments.eventName />
 		<cfset var handler = 0 />
+			
+		<!--- need to figure out if this is an attempt to announce a new event so we can adjust the event name --->	
+		<cfif left( name, len("{event}") ) IS "{event}">
+			<cfset name = right(name, len(name)-len("{event}") )  />
+			<cfset arguments.event.name( name ) />
+		</cfif>
 		
 		<cfif structKeyExists(variables.registry,name)>
 
@@ -147,11 +153,11 @@
 
 		<cfset variables.serverSupportsThreading = false />
 		
-		<cfif server.ColdFusion.ProductName is "coldfusion server">
+		<cfif server.ColdFusion.ProductName is "coldfusion server" or server.ColdFusion.ProductName is "Railo">
 			<cfif listFirst(server.ColdFusion.ProductVersion) gte 8>
 				<cfset variables.serverSupportsThreading = true />
 				<cfset variables.threadingModel = createObject("component","edmund.framework.coldfusion.Threading").init() />
-				<cfset variables.logger.info("Using ColdFusion threading model") />
+				<cfset variables.logger.info("Using ColdFusion/Railo threading model") />
 			</cfif>
 		<cfelseif server.ColdFusion.ProductName is "bluedragon">
 			<cfif listFirst(server.ColdFusion.ProductVersion) gte 7>
