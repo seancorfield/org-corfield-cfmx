@@ -1,6 +1,6 @@
 <!---
  
-  Copyright (c) 2008, Sean Corfield
+  Copyright (c) 2008-2009, Sean Corfield, Pat Santora
   
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
