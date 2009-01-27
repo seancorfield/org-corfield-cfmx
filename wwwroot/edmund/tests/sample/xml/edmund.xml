@@ -26,12 +26,26 @@
 			<notify listener="m2" method="directCall" />
 			<publish message="msg1"/>
 			<publish message="msg2"/>
+			<announce event="mach2"/>
+		</event-handler>
+		
+		<event-handler event="mach2">
+			<notify listener="m2" method="directCall" />
 		</event-handler>
 		
 		<event-handler name="model">
 			<broadcasts>
 				<message name="msg3" />
 				<message name="msg4" />
+			</broadcasts>
+			<results>
+				<result do="model2"/>
+			</results>
+		</event-handler>
+	
+		<event-handler name="model2">
+			<broadcasts>
+				<message name="msg3" />
 			</broadcasts>
 		</event-handler>
 	
