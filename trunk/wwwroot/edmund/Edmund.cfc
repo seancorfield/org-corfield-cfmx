@@ -187,12 +187,8 @@
 				hint="I dispatch an event by name, with no values.">
 		<cfargument name="eventName" type="string" required="true" 
 					hint="I am the name of the event to be handled." />
-
-		<cfset var event = new() />
-		<cfset event.name(arguments.eventName) />
-		<cfset event.requestName(arguments.eventName) />
 		
-		<cfset dispatchEvent( event ) />
+		<cfset dispatchEvent( new().name(arguments.eventName) ) />
 
 	</cffunction>
 	

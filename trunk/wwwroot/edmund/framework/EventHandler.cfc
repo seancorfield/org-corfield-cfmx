@@ -90,6 +90,8 @@
 		<cfif left( name, len("{event}") ) IS "{event}">
 			<cfset name = right(name, len(name)-len("{event}") )  />
 			<cfset arguments.event.name( name ) />
+			
+			<cfset variables.logger.info("Announcing event '#name#'") />
 		</cfif>
 		
 		<cfif structKeyExists(variables.registry,name)>
