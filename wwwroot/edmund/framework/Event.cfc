@@ -19,7 +19,7 @@
 <cfcomponent output="false" hint="I represent an event.">
 	
 	<cfset variables.eventName = "[unnamed event]" />
-	<cfset variables.requestName = "[unnamed event]" />
+	<cfset variables.eventRequestName = "[unnamed event]" />
 	<cfset variables.eventValues = structNew() />
 	<cfset variables.bubbleUp = false />
 	
@@ -91,7 +91,14 @@
 					hint="I am the new name for the event. If omitted, this method returns the current event name." />
 	
 		<cfif structKeyExists(arguments,"eventName")>
+			
+			<!--- set request name (parent) if the eventName has not been set yet --->
+			<cfif variables.eventName is "[unnamed event]" or variables.eventName is "Event">
+				<cfset variables.eventRequestName = arguments.eventName />
+			</cfif>
+			
 			<cfset variables.eventName = arguments.eventName />
+
 			<cfreturn this />
 		<cfelse>
 			<cfreturn variables.eventName />
@@ -101,14 +108,14 @@
 	
 	<cffunction name="requestName" returntype="any" access="public" output="false"
 		hint="Sets the event name that started the request lifecycle.">
-		<cfargument name="requestName" type="string" required="false"
+		<cfargument name="eventRequestName" type="string" required="false"
 					hint="A request name for this event." />
 					
-		<cfif structKeyExists(arguments,"requestName")>
-			<cfset variables.requestName = arguments.requestName />
+		<cfif structKeyExists(arguments,"eventRequestName")>
+			<cfset variables.eventRequestName = arguments.eventRequestName />
 			<cfreturn this />
 		<cfelse>
-			<cfreturn variables.requestName />
+			<cfreturn variables.eventRequestName />
 		</cfif>
 		
 	</cffunction>
