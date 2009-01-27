@@ -90,15 +90,9 @@
 		<cfargument name="eventName" type="string" required="false" 
 					hint="I am the new name for the event. If omitted, this method returns the current event name." />
 	
-		<cfif structKeyExists(arguments,"eventName")>
-			
-			<!--- set request name (parent) if the eventName has not been set yet --->
-			<cfif variables.eventName is "[unnamed event]" or variables.eventName is "Event">
-				<cfset variables.eventRequestName = arguments.eventName />
-			</cfif>
-			
+		<cfif structKeyExists(arguments,"eventName")>			
 			<cfset variables.eventName = arguments.eventName />
-
+			<cfset variables.eventRequestName = arguments.eventName />
 			<cfreturn this />
 		<cfelse>
 			<cfreturn variables.eventName />
@@ -109,7 +103,7 @@
 	<cffunction name="requestName" returntype="any" access="public" output="false"
 		hint="Sets the event name that started the request lifecycle.">
 		<cfargument name="eventRequestName" type="string" required="false"
-					hint="A request name for this event." />
+					hint="A request name for this event. If omitted, this method returns the current request name." />
 					
 		<cfif structKeyExists(arguments,"eventRequestName")>
 			<cfset variables.eventRequestName = arguments.eventRequestName />
