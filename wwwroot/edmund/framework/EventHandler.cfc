@@ -84,12 +84,14 @@
 					hint="I am the event data to be used by the handler." />
 
 		<cfset var name = arguments.eventName />
+		<cfset var requestName = arguments.event.requestName() />
 		<cfset var handler = 0 />
 			
 		<!--- need to figure out if this is an attempt to announce a new event so we can adjust the event name --->	
-		<cfif left( name, len("{event}") ) IS "{event}">
+		<cfif left( name, len("{event}") ) is "{event}">
 			<cfset name = right(name, len(name)-len("{event}") )  />
-			<cfset arguments.event.name( name ) />
+			<!--- we rename the event but restore the request name --->
+			<cfset arguments.event.name( name ).requestName( requestName ) />
 			
 			<cfset variables.logger.info("Announcing event '#name#'") />
 		</cfif>
