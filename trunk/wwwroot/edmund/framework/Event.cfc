@@ -36,7 +36,7 @@
 
 		<cfset variables.edmund = arguments.edmund />
 		<cfset variables.eventName = arguments.eventName />
-		<cfset variables.requestName = arguments.eventName />
+		<cfset variables.eventRequestName = arguments.eventName />
 		<cfset variables.bubbleUp = arguments.bubble />
 		<!--- we always reuse the same struct and copy in event values to prevent accidental overwriting of other event object contents --->
 		<cfset structClear(variables.eventValues) />
