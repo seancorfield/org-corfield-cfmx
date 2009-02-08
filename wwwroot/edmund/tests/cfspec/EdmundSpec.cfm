@@ -82,6 +82,46 @@
 		
 	</describe>
 	
+	<describe hint="new event">
+		
+		<it should="be an instance of event">
+			<cfset $(edmund).new().shouldBeAnInstanceOf( "edmund.framework.Event" ) />
+		</it>
+		
+		<it should="be called event">
+			<cfset $(edmund).new().name().shouldEqual( "Event" ) />
+		</it>
+
+	</describe>
+	
+	<describe hint="new named event">
+		
+		<it should="be an instance of event">
+			<cfset $(edmund).newEvent( "namedEvent" ).shouldBeAnInstanceOf( "edmund.framework.Event" ) />
+		</it>
+		
+		<it should="be called namedEvent">
+			<cfset $(edmund).newEvent( "namedEvent" ).name().shouldEqual( "namedEvent" ) />
+		</it>
+
+	</describe>
+	
+	<describe hint="new typed event">
+		
+		<it should="be an instance of typed event">
+			<cfset $(edmund).new( "edmund.tests.cfspec.cfcs.TypedEvent" ).shouldBeAnInstanceOf( "edmund.tests.cfspec.cfcs.TypedEvent" ) />
+		</it>
+		
+		<it should="also be an instance of event">
+			<cfset $(edmund).new( "edmund.tests.cfspec.cfcs.TypedEvent" ).shouldBeAnInstanceOf( "edmund.framework.Event" ) />
+		</it>
+		
+		<it should="be called TypedEvent">
+			<cfset $(edmund).new( "edmund.tests.cfspec.cfcs.TypedEvent" ).name().shouldEqual( "TypedEvent" ) />
+		</it>
+
+	</describe>
+	
 	<describe hint="loader">
 		
 		<it should="throw an exception for a non-existant file">
@@ -92,6 +132,14 @@
 		<it should="throw an exception for ill-formed XML">
 			<cfset $(edmund).loadXML("I am not XML").shouldThrow( "expression", 
 				"An error occured while Parsing an XML document." ) />
+		</it>
+		
+	</describe>
+	
+	<describe hint="workflow">
+		
+		<it should="be an instance of workflow factory">
+			<cfset $(edmund).getWorkflow().shouldBeAnInstanceOf( "edmund.framework.workflow.Factory" ) />
 		</it>
 		
 	</describe>
