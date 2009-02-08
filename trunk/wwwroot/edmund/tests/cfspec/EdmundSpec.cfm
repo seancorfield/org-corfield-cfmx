@@ -1,3 +1,20 @@
+<!---
+ 
+  Copyright (c) 2008-2009, Sean Corfield, Pat Santora
+  
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+---> 
 
 <cfimport taglib="/cfspec" prefix="" />
 
@@ -19,7 +36,7 @@
 		
 		<it should="be unique">
 			<cfset anotherEdmund = createObject( "component", "edmund.Edmund" ).init() />
-			<cfset $(edmund).getId().shouldNotEqual( anotherEdmund.getId() ) />
+			<cfset $(edmund).shouldNotBe( anotherEdmund ) />
 		</it>
 		
 	</describe>
@@ -32,7 +49,7 @@
 		
 		<it should="have the base object as its parent">
 			<cfset child = edmund.newChild() />
-			<cfset $(child).getParent().getId().shouldEqual( edmund.getId() ) />
+			<cfset $(child).getParent().shouldBe( edmund ) />
 		</it>
 		
 	</describe>
@@ -44,8 +61,8 @@
 			<cfset childB = createObject( "component", "edmund.Edmund" ).init() />
 			<cfset edmund.addChild( childA ) />
 			<cfset edmund.addChild( childB ) />
-			<cfset $(childA).getParent().getId().shouldEqual( edmund.getId() ) />
-			<cfset $(childB).getParent().getId().shouldEqual( edmund.getId() ) />
+			<cfset $(childA).getParent().shouldBe( edmund ) />
+			<cfset $(childB).getParent().shouldBe( edmund ) />
 		</it>
 		
 	</describe>
@@ -58,7 +75,7 @@
 		
 		<it should="be the base object's parent">
 			<cfset parent = edmund.newParent() />
-			<cfset $(edmund).getParent().getId().shouldEqual( parent.getId() ) />
+			<cfset $(edmund).getParent().shouldBe( parent ) />
 		</it>
 		
 	</describe>
@@ -68,7 +85,7 @@
 		<it should="be the base object's parent">
 			<cfset parent = createObject( "component", "edmund.Edmund" ).init() />
 			<cfset edmund.setParent( parent ) />
-			<cfset $(edmund).getParent().getId().shouldEqual( parent.getId() ) />
+			<cfset $(edmund).getParent().shouldBe( parent ) />
 		</it>
 		
 	</describe>
@@ -77,7 +94,7 @@
 		
 		<it should="be the new object's parent">
 			<cfset child = createObject( "component", "edmund.Edmund" ).init( parent=edmund ) />
-			<cfset $(child).getParent().getId().shouldEqual( edmund.getId() ) />
+			<cfset $(child).getParent().shouldBe( edmund ) />
 		</it>
 		
 	</describe>
