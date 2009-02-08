@@ -20,7 +20,7 @@
 
 <describe hint="Edmund XML's">
 	
-	<describe hint="Model-Glue XML Support">
+	<describe hint="Model-Glue Support">
 		
 		<before>
 			<!--- we create the bean factory simply so we can track how the listener is used as a controller --->
@@ -67,6 +67,9 @@
 			<cfset $(listener.handled("next").name).shouldEqual( "next" ) />
 		</it>
 		
+	</describe>
+	
+	<describe hint="Mach-II Support">
 	</describe>
 	
 </describe>
