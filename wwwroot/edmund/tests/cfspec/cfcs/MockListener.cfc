@@ -36,13 +36,28 @@
 
 	</cffunction>
 
+	<cffunction name="called" returntype="struct" access="public" output="false">
+		<cfargument name="name" type="string" required="true" />
+		
+		<cfreturn matched(arguments.name,"handlerName") />
+
+	</cffunction>
+
 	<cffunction name="handled" returntype="struct" access="public" output="false">
 		<cfargument name="name" type="string" required="true" />
+		
+		<cfreturn matched(arguments.name,"name") />
+
+	</cffunction>
+
+	<cffunction name="matched" returntype="struct" access="private" output="false">
+		<cfargument name="name" type="string" required="true" />
+		<cfargument name="attribute" type="string" required="true" />
 		
 		<cfset var item = 0 />
 
 		<cfloop index="item" array="#variables.history#">
-			<cfif item.name is arguments.name>
+			<cfif item[arguments.attribute] is arguments.name>
 				<cfreturn item />
 			</cfif>
 		</cfloop>
