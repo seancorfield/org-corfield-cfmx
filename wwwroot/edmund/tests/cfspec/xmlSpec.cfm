@@ -70,6 +70,46 @@
 	</describe>
 	
 	<describe hint="Mach-II Support">
+	
+		<before>
+			<!--- we create the bean factory simply so we can track how the listener is used as a controller --->
+			<cfset beanFactory = createObject( "component", "edmund.tests.cfspec.cfcs.SimpleBeanFactory" ) />
+			<cfset listener = createObject( "component", "edmund.tests.cfspec.cfcs.MockListener" ).init() />
+			<cfset beanFactory.addBean( "listener", listener ) />
+			<cfset edmund = createObject( "component", "edmund.Edmund" ).init() />
+			<cfset edmund.setBeanFactory( beanFactory ) />
+			<cfset edmund.loadXML('
+					<mach-ii>
+						<listeners>
+							<listener name="listener" bean="listener" />
+						</listeners>
+						<event-handlers>
+							<event-handler event="start">
+								<notify listener="listener" method="startHandler" /> 
+								<announce event="next" />
+							</event-handler>
+						</event-handlers>
+					</mach-ii>
+				') />
+		</before>
+		
+		<it should="handle start event and notify listener">
+			<cfset edmund.dispatch( "start" ) />
+			<cfset $(listener.called("startHandler").requestName).shouldEqual( "start" ) />
+		</it>
+		
+		<it should="handle chained event (next from start)">
+			<cfset edmund.addEventListener( "next", listener ) />
+			<cfset edmund.dispatch( "start" ) />
+			<cfset $(listener.handled("next").requestName).shouldEqual( "start" ) />
+		</it>
+		
+		<it should="handle chained event with correct name (next from start)">
+			<cfset edmund.addEventListener( "next", listener ) />
+			<cfset edmund.dispatch( "start" ) />
+			<cfset $(listener.handled("next").name).shouldEqual( "next" ) />
+		</it>
+		
 	</describe>
 	
 </describe>
